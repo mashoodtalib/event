@@ -20,6 +20,7 @@ io.on("connection", (socket) => {
 });
 router.post("/addevent", async (req, res) => {
   console.log("sent by client - ", req.body);
+  return
   const { eventId, name, date, isPrivate } = req.body;
 
   const event = new Event({
@@ -41,9 +42,9 @@ router.post("/addevent", async (req, res) => {
     //   event: { eventId, name, date, isPrivate },
 
     // });
-    socket.on("newEvent", function () {
-      io.sockets.emit("newEvent", event);
-    });
+    // socket.on("newEvent", function () {
+    //   io.sockets.emit("newEvent", event);
+    // });
     //io.sockets.emit("newEvent", event);
     return res.status(200).send({
       message: "Event Added Successfully",
@@ -74,8 +75,10 @@ router.post("/setuserevents", async (req, res) => {
     });
 });
 
-router.get("/events", (req, res) => {
-  Event.find({ isPrivate: 0 }, (err, events) => {
+router.post("/events", (req, res) => {
+  const { isPrivate } = req.body;
+  console.log("isPrivate - ", isPrivate);
+  Event.find({ isPrivate : isPrivate }, (err, events) => {
     if (err) return res.status(500).send(err);
     return res.status(200).send(events);
   });

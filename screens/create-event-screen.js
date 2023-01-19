@@ -71,15 +71,15 @@ function CreateEventScreen({ navigation }) {
       is24Hour: true,
     });
   };
-  useEffect(() => {
-    const socket = io("http://192.168.100.7:3002");
-    socket.on("newEvent", (event) => {
-      Alert.alert("New Event", `A new event "${event.name}" has been created!`);
-    });
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
+  // useEffect(() => {
+  //   const socket = io("http://192.168.100.7:3002");
+  //   socket.on("newEvent", (event) => {
+  //     Alert.alert("New Event", `A new event "${event.name}" has been created!`);
+  //   });
+  //   return () => {
+  //     socket.disconnect();
+  //   };
+  // }, []);
   const showDatepicker = () => {
     showMode("date");
   };
@@ -151,7 +151,6 @@ function CreateEventScreen({ navigation }) {
       });
     }
   };
-  console.log(eventSet);
   return (
     <CustomBubble
       bubbleColor={Colors.brown}

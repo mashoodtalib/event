@@ -94,8 +94,10 @@ export default function RegisterScreen({ navigation }) {
   return (
     <LinearGradientComponent>
       <SafeAreaView style={styles.rootScreen}>
+      <View style={styles.textInputField}>
         <Text style={styles.text}>Play</Text>
         <Text style={styles.textLife}>Your Life</Text>
+        </View>
         {errormsg ? <Text style={styles.errormessage}>{errormsg}</Text> : null}
         <TextInput
           style={styles.input}
@@ -173,6 +175,10 @@ const styles = StyleSheet.create({
     fontSize: 30,
     color: Colors.orange,
     marginBottom: 10,
+  },
+  textInputField: {
+    alignItems: "center",
+    justifyContent: "center",
   },
   text: {
     fontFamily: "GothicA1-Bold",

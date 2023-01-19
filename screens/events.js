@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Animated, Dimensions, StyleSheet, Text, View } from "react-native";
+import { Animated, Dimensions, StyleSheet, Text, View, FlatList } from "react-native";
 import CustomBubble from "../components/Custom-Bubble";
 import Colors from "../constants/colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -21,6 +21,7 @@ export default function Events({ navigation }) {
     >
       <View style={styles.root}>
         <Text style={styles.fontDesign}>{"Events"}</Text>
+      <View style={styles.container}>
         <View style={styles.anRoot}>
           <View style={styles.sm_bubble}>
             <View
@@ -53,12 +54,70 @@ export default function Events({ navigation }) {
             </View>
           </View>
         </View>
+        </View>
+        <View style={styles.container}>
+        <View style={styles.anRoot}>
+          <View style={styles.sm_bubble}>
+            <View
+              style={{
+                flexDirection: "column",
+                alignItems: "center",
+                margin: 5,
+              }}
+            >
+              <Ionicons name="person-circle" size={28} color={Colors.white} />
+              <Text style={styles.fontDesn}>Testing</Text>
+              <Text style={styles.fontDesn}>Test Name</Text>
+              <Text style={styles.fontDesn}>20-2020-May</Text>
+            </View>
+          </View>
+        </View>
+        <View style={styles.anRoot}>
+          <View style={styles.sm_bubble}>
+            <View
+              style={{
+                flexDirection: "column",
+                alignItems: "center",
+                margin: 5,
+              }}
+            >
+              <Ionicons name="person-circle" size={28} color={Colors.white} />
+              <Text style={styles.fontDesn}>Mashood</Text>
+              <Text style={styles.fontDesn}>Check</Text>
+              <Text style={styles.fontDesn}>5-2022-May</Text>
+            </View>
+          </View>
+        </View>
+        <View style={styles.anRoot}>
+          <View style={styles.sm_bubble}>
+            <View
+              style={{
+                flexDirection: "column",
+                alignItems: "center",
+                margin: 5,
+              }}
+            >
+              <Ionicons name="person-circle" size={28} color={Colors.white} />
+              <Text style={styles.fontDesn}>Mashood</Text>
+              <Text style={styles.fontDesn}>Check</Text>
+              <Text style={styles.fontDesn}>5-2022-May</Text>
+            </View>
+          </View>
+        </View>
+        </View>
       </View>
     </CustomBubble>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    display: "flex",
+    flexDirection: "row",
+  },
+  anRoot: {
+    padding: 12,
+  },
   sm_bubble: {
     height: 90,
     width: 90,
@@ -67,17 +126,10 @@ const styles = StyleSheet.create({
   },
   root: {
     flex: 1,
-    marginTop: size / 11,
-
-    alignItems: "center",
-    flexDirection: "column",
-  },
-  anRoot: {
-    marginTop: size / 11,
-    flexDirection: "row",
-
+    padding: 20,
     alignItems: "center",
   },
+
   fontDesign: {
     fontFamily: "GothicA1-Regular",
 

@@ -16,7 +16,7 @@ import LinearGradientComponent from "../components/Linear-Gradient-component";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import apis from "../constants/static-ip";
 const { width, height } = Dimensions.get("window");
-
+const size = Math.min(width, height) - 1;
 export default function LoginScreen({ navigation }) {
   const [toggle, setToggle] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -63,9 +63,11 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <LinearGradientComponent>
-      <SafeAreaView style={styles.rootScreen}>
+      <View style={styles.rootScreen}>
+        <View style={styles.textInputField}>
         <Text style={styles.text}>Play</Text>
         <Text style={styles.textLife}>Your Life</Text>
+        </View>
         {errormsg ? <Text style={styles.errormessage}>{errormsg}</Text> : null}
         <TextInput
           style={styles.input}
@@ -114,7 +116,7 @@ export default function LoginScreen({ navigation }) {
           </Pressable>
         </View>
         {/* <Text>{JSON.stringify({ name, userName, email, password })}</Text> */}
-      </SafeAreaView>
+      </View>
     </LinearGradientComponent>
   );
 }
@@ -122,7 +124,10 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   rootScreen: {
     flex: 1,
-    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  textInputField: {
     alignItems: "center",
     justifyContent: "center",
   },

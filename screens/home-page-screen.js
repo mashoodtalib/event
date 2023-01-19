@@ -40,7 +40,8 @@ function HomePage({ navigation, route }) {
   };
 
   return (
-    <View style={styles.root}>
+    <View style={{ flex: 1, height: height}}>
+      <View style={styles.firstContainer}>
       <Bubble
         onpress={() =>
           navigation.navigate(
@@ -50,7 +51,6 @@ function HomePage({ navigation, route }) {
             { disabledAnimation: true }
           )
         }
-        bubbleStyle={{ position: "absolute", top: 85, left: -7, zIndex: 1 }}
         styleBubble={{
           backgroundColor: Colors.dark,
 
@@ -65,7 +65,7 @@ function HomePage({ navigation, route }) {
       />
       <Bubble
         onpress={() => navigation.push("Settings", { disabledAnimation: true })}
-        bubbleStyle={{ top: 45, position: "absolute", zIndex: 1, right: 24 }}
+
         styleBubble={{
           backgroundColor: Colors.orange,
 
@@ -78,11 +78,88 @@ function HomePage({ navigation, route }) {
         iconColor={Colors.dark}
         textStyle={styles.textone}
       />
+      </View>
+      <View style={styles.secondContainer}>
       <Bubble
+        onpress={() =>
+          navigation.navigate(
+            "allFriends",
+            { data: data },
+
+            { disabledAnimation: true }
+          )
+        }
+        styleBubble={{
+          backgroundColor: Colors.dark,
+
+          height: 190,
+          width: width < 450 ? 190 : 190,
+        }}
+        iconName={"md-chatbubble-ellipses-outline"}
+        textMessage={selectLan == 0 ? language[0].eng : language[0].arab}
+        iconSize={48}
+        iconColor={Colors.pink}
+        textStyle={styles.text}
+      />
+      <Bubble
+        onpress={() => navigation.push("Settings", { disabledAnimation: true })}
+
+        styleBubble={{
+          backgroundColor: Colors.orange,
+
+          height: 130,
+          width: width < 450 ? 130 : 130,
+        }}
+        iconName={"md-settings-outline"}
+        textMessage={selectLan == 0 ? language[1].eng : language[1].arab}
+        iconSize={42}
+        iconColor={Colors.dark}
+        textStyle={styles.textone}
+      />
+      </View>
+      <View style={styles.thirdContainer}>
+      <Bubble
+        onpress={() =>
+          navigation.navigate(
+            "allFriends",
+            { data: data },
+
+            { disabledAnimation: true }
+          )
+        }
+        styleBubble={{
+          backgroundColor: Colors.dark,
+
+          height: 190,
+          width: width < 450 ? 190 : 190,
+        }}
+        iconName={"md-chatbubble-ellipses-outline"}
+        textMessage={selectLan == 0 ? language[0].eng : language[0].arab}
+        iconSize={48}
+        iconColor={Colors.pink}
+        textStyle={styles.text}
+      />
+      <Bubble
+        onpress={() => navigation.push("Settings", { disabledAnimation: true })}
+
+        styleBubble={{
+          backgroundColor: Colors.orange,
+
+          height: 130,
+          width: width < 450 ? 130 : 130,
+        }}
+        iconName={"md-settings-outline"}
+        textMessage={selectLan == 0 ? language[1].eng : language[1].arab}
+        iconSize={42}
+        iconColor={Colors.dark}
+        textStyle={styles.textone}
+      />
+      </View>
+      {/* <Bubble
         onpress={() =>
           navigation.push("CreateEvent", { disabledAnimation: true })
         }
-        bubbleStyle={{ top: 200, position: "absolute", zIndex: 1, right: -35 }}
+        bubbleStyle={{ top: 200, position: "absolute", zIndex: 1, right: -20 }}
         styleBubble={{
           backgroundColor: Colors.brown,
 
@@ -141,17 +218,14 @@ function HomePage({ navigation, route }) {
         iconSize={40}
         iconColor={Colors.dark}
         textStyle={styles.text}
-      />
+      /> */}
     </View>
   );
-}
-
+};
 const styles = StyleSheet.create({
   root: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+   flex: 1,
+   marginTop: 20,
   },
 
   text: {
@@ -164,7 +238,7 @@ const styles = StyleSheet.create({
     fontFamily: "GothicA1-Regular",
     color: Colors.white,
     fontSize: 20,
-    paddingTop: 8,
+    paddingTop: 4,
   },
   texttwo: {
     fontFamily: "GothicA1-Regular",
@@ -190,10 +264,30 @@ const styles = StyleSheet.create({
     backgroundColor: "#fc5c65",
     marginVertical: 50,
   },
-  container: {
-    flex: 1,
-    justifyContent: "flex-end",
-    alignItems: "center",
+  secondContainer: {
+    padding: 10,
   },
+  firstContainer: {
+   flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    margin : 10,
+    paddingHorizontal: 20,
+    paddingVertical: 25,
+  },
+  secondContainer: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  thirdContainer: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    margin : 10,
+    paddingHorizontal: 20,
+    paddingVertical: 25,
+  },
+
 });
 export default HomePage;
