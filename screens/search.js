@@ -12,6 +12,7 @@ import React, { useEffect, useState } from "react";
 import Colors from "../constants/colors";
 import CustomBubble from "../components/Custom-Bubble";
 import UserCard from "../components/userCard";
+import apis from "../constants/static-ip";
 const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
 
@@ -24,7 +25,7 @@ const SearchUserPage = ({ navigation }) => {
   const getallusers = async () => {
     if (keyword.length > 0) {
       setLoading(true);
-      fetch("http://192.168.100.7:3000/searchuser", {
+      fetch(apis + "searchuser", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -94,10 +94,12 @@ export default function YourAccount({ navigation }) {
           {selectLan == 1 ? <View style={styles.radius} /> : null}
         </View>
         <ChangePassword
+          navigation={navigation}
           modalVisible={modalVisible}
           setModalVisible={setModalVisible}
         />
         <ChangeUserName
+          navigation={navigation}
           modalVisible={modalVisible1}
           setModalVisible={setModalVisible1}
         />

@@ -13,9 +13,10 @@ import {
 } from "react-native";
 import Colors from "../constants/colors";
 import { language } from "../constants/language";
+import apis from "../constants/static-ip";
 const { width, height } = Dimensions.get("window");
 
-function ChangeUserName({ modalVisible, setModalVisible }) {
+function ChangeUserName({ navigation, modalVisible, setModalVisible }) {
   const [selectLan, setSelectLan] = useState(0);
   const [userName, setnewuser] = React.useState("");
   const handlePasswordChange = () => {
@@ -24,26 +25,27 @@ function ChangeUserName({ modalVisible, setModalVisible }) {
     } else {
       // setLoading(true);
       AsyncStorage.getItem("user").then((data) => {
-        fetch("http://192.168.100.7:3000/setusername", {
+        console.log(JSON.parse(data).user.email);
+        console.log(JSON.parse(data).user.userName);
+        fetch(apis + "setusername", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(data).tokens,
           },
           body: JSON.stringify({
-            email: JSON.parse(data).user.email,
             userName: userName,
+            email: JSON.parse(data).user.email,
           }),
         })
           .then((res) => res.json())
           .then((data) => {
-            if (data.message == "userName Changed Successfully") {
+            if (data.message == "Username Updated Successfully") {
               //  setLoading(false);
-              alert("userName Changed Successfully");
+              alert("Username Changed Successfully");
               AsyncStorage.removeItem("user");
-              navigation.navigate("Login");
+              navigation.push("Login");
             } else {
-              alert("Wrong userName");
+              alert("Something went Wrong");
               //  setLoading(false);
             }
           });

@@ -20,6 +20,10 @@ import ProfileScreen from "./screens/profile-pages/profile-screren";
 import YourAccount from "./screens/settings-pages/your-account";
 import SearchUserPage from "./screens/search";
 import OtherUser from "./screens/profile-pages/other-user";
+import AllFriends from "./screens/all-chats/all-friends";
+import Message from "./screens/all-chats/message";
+import ProfileBubble from "./components/profile-bubble";
+import SendEvents from "./screens/send-events";
 
 const Stack = createNativeStackNavigator();
 export default function AppWrapper() {
@@ -48,7 +52,7 @@ function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="CreateEvent">
+      <Stack.Navigator initialRouteName="Login">
         <Stack.Screen
           name="Account"
           component={YourAccount}
@@ -91,7 +95,7 @@ function App() {
         />
         <Stack.Screen
           name="ProfileScreen"
-          component={ProfileScreen}
+          component={ProfileBubble}
           options={{ headerShown: false }}
         />
         <Stack.Screen
@@ -102,6 +106,21 @@ function App() {
         <Stack.Screen
           name="Other_UserProfile"
           component={OtherUser}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="allFriends"
+          component={AllFriends}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Messages"
+          component={Message}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="SendEvents"
+          component={SendEvents}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

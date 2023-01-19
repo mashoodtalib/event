@@ -21,17 +21,18 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
-function HomePage({ navigation }) {
+function HomePage({ navigation, route }) {
   const [selectLan, setSelectLan] = useState(0);
-
+  const { data } = route.params;
   AsyncStorage.getItem("user")
     .then((data) => {
-      console.log("data", data);
+      // console.log("data", data);
     })
     .catch((err) => alert(err));
 
   useEffect(() => {
     getLang();
+    console.log("data", data);
   }, []);
 
   const getLang = async () => {
@@ -42,7 +43,12 @@ function HomePage({ navigation }) {
     <View style={styles.root}>
       <Bubble
         onpress={() =>
-          navigation.push("CreateEvent", { disabledAnimation: true })
+          navigation.navigate(
+            "allFriends",
+            { data: data },
+
+            { disabledAnimation: true }
+          )
         }
         bubbleStyle={{ position: "absolute", top: 85, left: -7, zIndex: 1 }}
         styleBubble={{
@@ -91,7 +97,7 @@ function HomePage({ navigation }) {
       />
       <Bubble
         onpress={() =>
-          navigation.push("ProfileScreen", { disabledAnimation: true })
+          navigation.navigate("ProfileScreen", { disabledAnimation: true })
         }
         bubbleStyle={{ top: 305, position: "absolute", zIndex: 1, left: -30 }}
         styleBubble={{

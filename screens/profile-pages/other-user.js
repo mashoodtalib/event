@@ -3,6 +3,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 
 import {
   ActivityIndicator,
+  Alert,
   Animated,
   Dimensions,
   Image,
@@ -13,6 +14,7 @@ import {
 } from "react-native";
 import Colors from "../../constants/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import apis from "../../constants/static-ip";
 
 const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
@@ -46,6 +48,8 @@ export default function OtherUser({ navigation, route }) {
       const loggeduserobj = JSON.parse(loggeduser);
       if (loggeduserobj.user._id == otheruser._id) {
         setIssameuser(true);
+        alert("Same User Found");
+        navigation.push("search", { disabledAnimation: true });
       } else {
         setIssameuser(false);
       }
@@ -54,7 +58,7 @@ export default function OtherUser({ navigation, route }) {
   const { user } = route.params;
   // console.log(user)
   const loaddata = async () => {
-    fetch("http://192.168.100.7:3000/otheruserdata", {
+    fetch(apis + "otheruserdata", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -69,21 +73,16 @@ export default function OtherUser({ navigation, route }) {
           CheckFollow(data.user);
         } else {
           alert("User Not Found");
-          navigation.navigate("SearchUserPage");
+          navigation.navigate("search");
           // navigation.navigate('Login')
         }
       })
       .catch((err) => {
         // console.log(err)
         alert("Something Went Wrong");
-        navigation.navigate("SearchUserPage");
+        navigation.navigate("search");
       });
   };
-  useEffect(() => {
-    loaddata();
-  }, []);
-
-  // console.log('userdata ', userdata)
 
   const FollowThisUser = async () => {
     console.log("FollowThisUser");
@@ -91,7 +90,7 @@ export default function OtherUser({ navigation, route }) {
     const loggeduserobj = JSON.parse(loggeduser);
     console.log(loggeduser);
     console.log(loggeduserobj);
-    fetch("http://192.168.100.7:3000/followuser", {
+    fetch(apis + "followuser", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -119,7 +118,7 @@ export default function OtherUser({ navigation, route }) {
   const CheckFollow = async (otheruser) => {
     AsyncStorage.getItem("user").then((loggeduser) => {
       const loggeduserobj = JSON.parse(loggeduser);
-      fetch("http://192.168.100.7:3000/checkfollow", {
+      fetch(apis + "checkfollow", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -147,7 +146,7 @@ export default function OtherUser({ navigation, route }) {
     console.log("UnfollowThisUser");
     const loggeduser = await AsyncStorage.getItem("user");
     const loggeduserobj = JSON.parse(loggeduser);
-    fetch("http://192.168.100.7:3000/unfollowuser", {
+    fetch(apis + "unfollowuser", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -160,7 +159,7 @@ export default function OtherUser({ navigation, route }) {
       .then((res) => res.json())
       .then((data) => {
         if (data.message == "User Unfollowed") {
-          // alert('Followed')
+          alert("User Unfollowed");
           loaddata();
           setIsfollowing(false);
         } else {
@@ -191,7 +190,7 @@ export default function OtherUser({ navigation, route }) {
 
           { opacity: progress, transform: [{ scale }] },
         ]}
-      ></Animated.View>
+      />
       <Animated.View
         style={[
           styles.icon,
@@ -205,9 +204,10 @@ export default function OtherUser({ navigation, route }) {
           name={"ios-close-outline"}
           color={Colors.white}
           size={44}
-          onPress={() =>
-            navigation.push("HomePage", { disabledAnimation: true })
-          }
+          onPress={() => {
+            setUserdata(null);
+            navigation.push("search", { disabledAnimation: true });
+          }}
         />
       </Animated.View>
       <Animated.View
@@ -246,14 +246,14 @@ export default function OtherUser({ navigation, route }) {
             { opacity: progress, transform: [{ scale }] },
           ]}
         >
-          {userdata.profile_pic === "" ? (
+          {/* {userdata.profile_pic === "" ? (
             <Ionicons name={"person-outline"} color={Colors.white} size={44} />
           ) : (
             <Image
               style={styles.profilepic}
               source={{ uri: userdata.profile_pic }}
             />
-          )}
+          )} */}
         </Animated.View>
         {/* //  </TouchableOpacity> */}
 
@@ -285,38 +285,6 @@ export default function OtherUser({ navigation, route }) {
               size={24}
             />
           )}
-        </Animated.View>
-        <Animated.View
-          style={[
-            styles.smallCircle,
-            styles.icon,
-            {
-              backgroundColor: Colors.orange,
-              right: size / 1.4 - 2,
-              top: size / 3.2,
-            },
-            { opacity: progress, transform: [{ scale }] },
-          ]}
-        >
-          <Ionicons
-            name={"md-chatbubbles-sharp"}
-            color={Colors.white}
-            size={24}
-          />
-        </Animated.View>
-        <Animated.View
-          style={[
-            styles.smallCircle,
-            styles.icon,
-            {
-              backgroundColor: Colors.orange,
-              right: size / 1.5 - 10,
-              top: size / 1.9,
-            },
-            { opacity: progress, transform: [{ scale }] },
-          ]}
-        >
-          <Ionicons name={"calendar-outline"} color={Colors.white} size={24} />
         </Animated.View>
       </Animated.View>
     </View>

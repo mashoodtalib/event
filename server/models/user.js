@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   profile_pic: {
+    data: Buffer,
+    contentType: String,
+  },
+  profile_pic_name: {
     type: String,
     default: "",
   },
@@ -41,6 +45,10 @@ const userSchema = new mongoose.Schema({
   },
 
   allmessages: {
+    type: Array,
+    default: [],
+  },
+  allevents: {
     type: Array,
     default: [],
   },

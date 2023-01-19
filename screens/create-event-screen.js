@@ -1,10 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import RadioButton, {
+  RadioButtonInput,
+  RadioButtonLabel,
+} from "react-native-simple-radio-button";
+
 //import CalendarPicker from "react-native-calendar-picker";
 import DatePicker, {
   DateTimePickerAndroid,
 } from "@react-native-community/datetimepicker";
 import {
+  Switch,
   Animated,
   Button,
   Dimensions,
@@ -16,40 +21,26 @@ import {
   Text,
   TextInput,
   View,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import Colors from "../constants/colors";
 import CustomBubble from "../components/Custom-Bubble";
-import { TouchableOpacity } from "react-native-gesture-handler";
+
+import RadioForm from "react-native-simple-radio-button";
+import io from "socket.io-client";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const socket = io("http://192.168.100.7:3002");
+import apis from "../constants/static-ip";
 
 const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
 
 function CreateEventScreen({ navigation }) {
-  const [s, sets] = useState(0);
-  const [p, setp] = useState([
-    { name: "Private", selected: true },
-    { name: "Public", selected: false },
-  ]);
-  const onSelect = (index) => {
-    const temp = p;
-    temp.map((item, ind) => {
-      if (index == ind) {
-        if (item.selected == true) {
-          item.selected = false;
-        } else {
-          item.selected = true;
-          sets(index);
-        }
-      } else {
-        item.selected = false;
-      }
-    });
-    let temp2 = [];
-    temp.map((item) => {
-      temp2.push(item);
-    });
-    setp(temp2);
-  };
+  const [isActive, setIsActive] = useState();
+  const [load, setIsLoad] = useState(false);
+
   const month = [
     "Jan",
     "Feb",
@@ -80,7 +71,15 @@ function CreateEventScreen({ navigation }) {
       is24Hour: true,
     });
   };
-
+  useEffect(() => {
+    const socket = io("http://192.168.100.7:3002");
+    socket.on("newEvent", (event) => {
+      Alert.alert("New Event", `A new event "${event.name}" has been created!`);
+    });
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
   const showDatepicker = () => {
     showMode("date");
   };
@@ -94,7 +93,65 @@ function CreateEventScreen({ navigation }) {
     Animated.timing(progress, { toValue: 1, useNativeDriver: true }).start();
     Animated.timing(scale, { toValue: 1.3, useNativeDriver: true }).start();
   }, []);
-
+  // 0 pulic,1 prrivate
+  var radio_props = [
+    { label: "Private", value: 0 },
+    { label: "Public", value: 1 },
+  ];
+  const eventSet = () => {
+    console.log("****");
+    if (text === "" || date === "") {
+      alert("Please fill all the fields");
+    } else {
+      setIsLoad(true);
+      AsyncStorage.getItem("user").then((data) => {
+        // console.log(JSON.parse(data).user.email);
+        // console.log(JSON.parse(data).user.userName);
+        fetch(apis + "addevent", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            eventId: JSON.parse(data).user._id,
+            name: text,
+            date: date,
+            isPrivate: isActive,
+          }),
+        })
+          .then((res) => res.json())
+          .then((dat) => {
+            if (dat.message == "Event Added Successfully") {
+              fetch(apis + "setuserevents", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  id: JSON.parse(data).user._id,
+                  name: text,
+                  date: date,
+                  isPrivate: isActive,
+                }),
+              })
+                .then((res) => res.json())
+                .then((data) => {
+                  if (data.message == "Event Added Successfully") {
+                    console.log("Event Added Successfully");
+                  }
+                });
+              setIsLoad(false);
+              onChangeText("");
+              // alert("Event Added Successfully");
+            } else {
+              alert("Something went Wrong");
+              setIsLoad(false);
+            }
+          });
+      });
+    }
+  };
+  console.log(eventSet);
   return (
     <CustomBubble
       bubbleColor={Colors.brown}
@@ -140,55 +197,59 @@ function CreateEventScreen({ navigation }) {
           </Pressable>
         </View>
 
-        <View style={{ marginTop: size / 13, flexDirection: "row" }}>
-          <Text style={styles.fontDesign}>Privacy </Text>
-          <View style={{ flexDirection: "column" }}>
-            <FlatList
-              data={p}
-              renderItem={({ item, index }) => {
-                return (
-                  <TouchableOpacity
-                    style={[
-                      styles.lanItem,
-                      {
-                        borderColor:
-                          item.selected == true ? Colors.orange : Colors.black,
-                      },
-                    ]}
-                    onPress={() => {
-                      onSelect(index);
-                    }}
-                  >
-                    {item.selected == true ? (
-                      <Image
-                        source={require("../assets/radio-button.png")}
-                        style={styles.icon}
-                      />
-                    ) : (
-                      <Image
-                        source={require("../assets/radio.png")}
-                        style={styles.icon}
-                      />
-                    )}
-
-                    <Text style={{ marginLeft: 20, fontSize: 20 }}>
-                      {item.name}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              }}
-            />
-          </View>
-        </View>
-        <Pressable
-          style={[styles.dateIn, { height: 25, width: 50 }]}
-          onPress={() => {
-            alert("Successfully Added Event");
-            navigation.navigate("HomePage");
+        <View
+          style={{
+            marginTop: size / 13,
+            marginRight: size / 7,
+            flexDirection: "row",
           }}
         >
-          <Text style={styles.fontDesign1}>Set</Text>
-        </Pressable>
+          <Text style={[styles.fontDesign, { marginRight: 5 }]}>Privacy </Text>
+          <View style={{ flexDirection: "column" }}>
+            {/* To create radio buttons, loop through your array of options */}
+            {radio_props.map((obj, i) => (
+              <RadioButton labelHorizontal={false} key={i}>
+                {/*  You can set RadioButtonLabel before RadioButtonInput */}
+                <View style={styles.lanItem}>
+                  <RadioButtonInput
+                    obj={obj}
+                    index={i}
+                    isSelected={isActive === i}
+                    onPress={(value) => setIsActive(value)}
+                    borderWidth={0}
+                    buttonInnerColor={Colors.pink}
+                    buttonOuterColor={Colors.white}
+                    buttonSize={12}
+                    buttonOuterSize={18}
+                    // buttonStyle={{}}
+                    // buttonWrapStyle={{ marginLeft: 10 }}
+                  />
+                  <RadioButtonLabel
+                    obj={obj}
+                    index={i}
+                    onPress={(value) => setIsActive(value)}
+                    labelStyle={[
+                      styles.fontDesign1,
+                      { color: Colors.pink, fontSize: 14, marginLeft: 4 },
+                    ]}
+                  />
+                </View>
+              </RadioButton>
+            ))}
+          </View>
+        </View>
+        {!load ? (
+          <Pressable
+            style={[styles.dateIn, { height: 25, width: 50, marginTop: 8 }]}
+            onPress={() => {
+              eventSet();
+            }}
+          >
+            <Text style={styles.fontDesign1}>Set</Text>
+          </Pressable>
+        ) : (
+          <ActivityIndicator />
+        )}
       </View>
     </CustomBubble>
   );
@@ -198,7 +259,6 @@ export default CreateEventScreen;
 const styles = StyleSheet.create({
   root: {
     marginTop: size / 13,
-
     flex: 1,
     alignItems: "center",
     flexDirection: "column",
@@ -206,7 +266,6 @@ const styles = StyleSheet.create({
   anRoot: {
     marginTop: size / 13,
     flexDirection: "row",
-
     alignItems: "center",
   },
   fontDesign: {
@@ -236,16 +295,15 @@ const styles = StyleSheet.create({
     borderColor: Colors.pink,
     color: Colors.white,
     borderBottomColor: Colors.pink,
-
     borderBottomColor: "#000",
-
     overflow: "hidden",
   },
   lanItem: {
     width: "100%",
-    height: 40,
+    height: 30,
     color: Colors.pink,
     flexDirection: "row",
+    marginTop: 5,
     alignItems: "center",
   },
   icon: {

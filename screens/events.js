@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import { Animated, Dimensions, StyleSheet, Text, View } from "react-native";
 import CustomBubble from "../components/Custom-Bubble";
 import Colors from "../constants/colors";
+import Ionicons from "@expo/vector-icons/Ionicons";
+
 const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
 export default function Events({ navigation }) {
@@ -19,55 +21,55 @@ export default function Events({ navigation }) {
     >
       <View style={styles.root}>
         <Text style={styles.fontDesign}>{"Events"}</Text>
-      </View>
-      {/* <View style={styles.anRoot}>
-          <Text style={styles.fontDesign}>Name </Text>
-          <TextInput
-            textAlign="center"
-            cursorColor={Colors.thirdBubble}
-            style={styles.input}
-            onChangeText={onChangeText}
-            value={text}
-          />
+        <View style={styles.anRoot}>
+          <View style={styles.sm_bubble}>
+            <View
+              style={{
+                flexDirection: "column",
+                alignItems: "center",
+                margin: 5,
+              }}
+            >
+              <Ionicons name="person-circle" size={28} color={Colors.white} />
+              <Text style={styles.fontDesn}>Testing</Text>
+              <Text style={styles.fontDesn}>Test Name</Text>
+              <Text style={styles.fontDesn}>20-2020-May</Text>
+            </View>
+          </View>
         </View>
         <View style={styles.anRoot}>
-          <Text style={styles.fontDesign}>{texts1} </Text>
-          <Pressable onPress={() => showMode("date")}>
-            <View style={styles.input}></View>
-          </Pressable>
-        </View>
-
-        <View style={styles.anRoot}>
-          <Text style={styles.fontDesign}>Name </Text>
-          <TextInput
-            textAlign="center"
-            cursorColor={Colors.thirdBubble}
-            style={styles.input}
-            onChangeText={onChangeText}
-            value={text}
-          />
+          <View style={styles.sm_bubble}>
+            <View
+              style={{
+                flexDirection: "column",
+                alignItems: "center",
+                margin: 5,
+              }}
+            >
+              <Ionicons name="person-circle" size={28} color={Colors.white} />
+              <Text style={styles.fontDesn}>Mashood</Text>
+              <Text style={styles.fontDesn}>Check</Text>
+              <Text style={styles.fontDesn}>5-2022-May</Text>
+            </View>
+          </View>
         </View>
       </View>
-      {show && (
-        <DateTimePicker
-          testID="dateTimePicker"
-          value={date}
-          mode={mode}
-          display="default"
-          is24Hour={true}
-          onChange={onChange}
-        />
-      )} 
-      */}
     </CustomBubble>
   );
 }
 
 const styles = StyleSheet.create({
+  sm_bubble: {
+    height: 90,
+    width: 90,
+    borderRadius: 360,
+    backgroundColor: Colors.pink,
+  },
   root: {
     flex: 1,
+    marginTop: size / 11,
+
     alignItems: "center",
-    justifyContent: "center",
     flexDirection: "column",
   },
   anRoot: {
@@ -81,5 +83,11 @@ const styles = StyleSheet.create({
 
     color: Colors.white,
     fontSize: 24,
+  },
+  fontDesn: {
+    fontFamily: "GothicA1-Regular",
+
+    color: Colors.white,
+    fontSize: 9,
   },
 });

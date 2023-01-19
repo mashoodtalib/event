@@ -14,6 +14,7 @@ import * as React from "react";
 import PrimaryButton from "../components/Primary-Button";
 import LinearGradientComponent from "../components/Linear-Gradient-component";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import apis from "../constants/static-ip";
 const { width, height } = Dimensions.get("window");
 
 export default function LoginScreen({ navigation }) {
@@ -28,7 +29,7 @@ export default function LoginScreen({ navigation }) {
       alert("Please enter userName and password");
     } else {
       setLoading(true);
-      fetch("http://192.168.100.7:3000/signin", {
+      fetch(apis + "signin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -73,6 +74,7 @@ export default function LoginScreen({ navigation }) {
           placeholder="userName"
           autoCorrect={false}
         />
+
         <TextInput
           style={styles.input}
           onPressIn={() => setErrormsg(null)}

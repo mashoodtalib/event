@@ -14,6 +14,7 @@ import * as React from "react";
 import PrimaryButton from "../components/Primary-Button";
 import LinearGradientComponent from "../components/Linear-Gradient-component";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import apis from "../constants/static-ip";
 const { width, height } = Dimensions.get("window");
 
 export default function RegisterScreen({ navigation }) {
@@ -45,7 +46,7 @@ export default function RegisterScreen({ navigation }) {
         return;
       } else {
         // setLoading(true);
-        fetch("http://192.168.100.7:3000/signup", {
+        fetch(apis + "signup", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -66,10 +67,10 @@ export default function RegisterScreen({ navigation }) {
               setErrormsg(data.error);
             } else {
               // console.log(data.udata);
-              alert(data.message);
+              alert("User Register Successfully.Now do Login");
               // setLoading(false);
 
-              navigation.navigate("HomePage");
+              navigation.navigate("Login");
             }
           })
           .catch(function (error) {

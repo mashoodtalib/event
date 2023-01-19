@@ -11,15 +11,15 @@ const UserCard = ({ user, navigation }) => {
   return (
     <TouchableOpacity
       onPress={() => {
-        navigation.navigate("Other_UserProfile", { user: user });
+        navigation.push("Other_UserProfile", { user: user });
       }}
     >
       <View style={styles.ChatCard}>
-        {user.profile_pic ? (
+        {/* {user.profile_pic ? (
           <Image source={{ uri: user.profile_pic }} style={styles.image} />
         ) : (
           <Ionicons name={"person-outline"} color={Colors.white} size={44} />
-        )}
+        )} */}
 
         <View style={styles.c1}>
           <Text style={styles.username}>{user.username}</Text>

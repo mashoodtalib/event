@@ -13,29 +13,31 @@ import {
 } from "react-native";
 import Colors from "../constants/colors";
 import { language } from "../constants/language";
+import apis from "../constants/static-ip";
 const { width, height } = Dimensions.get("window");
 
-function ChangePassword({ modalVisible, setModalVisible }) {
+function ChangePassword({ navigation, modalVisible, setModalVisible }) {
   const [selectLan, setSelectLan] = useState(0);
   const [oldpassword, setoldpassword] = React.useState("");
   const [newpassword, setnewpassword] = React.useState("");
   const [conpassword, setconpassword] = React.useState("");
+
   const handlePasswordChange = () => {
     if (oldpassword === "" || newpassword === "" || conpassword === "") {
       alert("Please fill all the fields");
     } else if (newpassword !== conpassword) {
       alert("New password and confirm new password must be same");
     } else {
-      // setLoading(true);
       AsyncStorage.getItem("user").then((data) => {
-        fetch("http://192.168.100.7:3000/changepassword", {
+        console.log(JSON.parse(data).user.userName);
+        fetch(apis + "changepassword", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(data).tokens,
           },
+
           body: JSON.stringify({
-            email: JSON.parse(data).user.email,
+            userName: JSON.parse(data).user.userName,
             oldpassword: oldpassword,
             newpassword: newpassword,
           }),
@@ -43,13 +45,11 @@ function ChangePassword({ modalVisible, setModalVisible }) {
           .then((res) => res.json())
           .then((data) => {
             if (data.message == "Password Changed Successfully") {
-              //  setLoading(false);
               alert("Password Changed Successfully");
               AsyncStorage.removeItem("user");
-              navigation.navigate("Login");
+              navigation.push("Login");
             } else {
               alert("Wrong Password");
-              //  setLoading(false);
             }
           });
       });

@@ -11,19 +11,32 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
 import Colors from "../constants/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { firebase } from "../firebase/config";
 import * as ImagePicker from "expo-image-picker";
+import apis from "../constants/static-ip";
 const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
 
-export default function ProfileBubble({ navigation, children }) {
+export default function ProfileBubble({ navigation, route }) {
   const [userdata, setUserdata] = React.useState(null);
   const [image, setImage] = useState(null);
+  const [save, setSave] = React.useState(null);
 
   const [loading, setLoading] = useState(false);
-
+  useEffect(() => {
+    oldData();
+    // console.log(save.user.email);
+  }, []);
+  const oldData = async () => {
+    await AsyncStorage.getItem("user")
+      .then((data) => {
+        setSave(data);
+      })
+      .catch((err) => alert(err));
+  };
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -31,67 +44,67 @@ export default function ProfileBubble({ navigation, children }) {
       aspect: [1, 1],
       quality: 1,
     });
-    // console.log(result)
+    // console.log(result);
 
-    if (!result.assets) {
-      const source = { uri: result.assets };
-      setImage(source);
-
-      const response = await fetch(result.assets);
-      const blob = await response.blob();
-      const filename = result.assets.substring(result.assets);
-
-      const ref = firebase.storage().ref().child(filename);
-      const snapshot = await ref.put(blob);
-      const url = await snapshot.ref.getDownloadURL();
-
-      // console.log(url)
-      return url;
+    if (!result.canceled) {
+      setImage(result.assets);
+      console.log(result.assets);
+      handleUpload(result.assets);
     } else {
-      return null;
+      console.log(error);
     }
   };
 
-  const handleUpload = async () => {
-    AsyncStorage.getItem("user").then((data) => {
-      setLoading(true);
-      console.log(data.user);
-      pickImage().then((url) => {
-        fetch("http://192.168.100.7:3000/setprofilepic", {
-          method: "post",
+  const handleUpload = async (uri) => {
+    setLoading(true);
+
+    await AsyncStorage.getItem("user")
+      .then(async (value) => {
+        const formData = new FormData();
+
+        formData.append("image", {
+          uri,
+        });
+        formData.append("profile_pic_name", "image/png");
+        formData.append("email", JSON.parse(value).user.email);
+        //console.log(uri);
+        console.log(JSON.parse(value).user.email);
+
+        const options = {
+          method: "POST",
+          body: formData,
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "multipart/form-data",
           },
-          body: JSON.stringify({
-            email: JSON.parse(data).user.email,
-            profile_pic: url,
-          }),
-        })
+        };
+        await fetch(apis + "uploadimage", options)
           .then((res) => res.json())
           .then((data) => {
-            if (data.message === "Profile picture updated successfully") {
-              setLoading(false);
-              alert("Profile picture updated successfully");
-              navigation.navigate("HomePage");
-            } else if (data.error === "Invalid Credentials") {
-              alert("Invalid Credentials");
-              setLoading(false);
-              navigation.navigate("HomePage");
+            console.log(data);
+
+            if (data.message == "Image uploaded successfully") {
+              console.log("userdata ", userdata);
+
+              setUserdata(data.user);
             } else {
-              setLoading(false);
-              alert("Please Try Again");
+              alert("Something Wrong");
             }
           })
           .catch((err) => {
+            alert("Something Went Wrong");
             console.log(err);
           });
+      })
+      .catch((err) => {
+        alert(err);
+
+        // navigation.push("ProfileScreen");
       });
-    });
   };
   const loaddata = async () => {
     AsyncStorage.getItem("user")
       .then(async (value) => {
-        fetch("http://192.168.100.7:3000/userdata", {
+        fetch(apis + "userdata", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -103,6 +116,8 @@ export default function ProfileBubble({ navigation, children }) {
           .then((data) => {
             if (data.message == "User Found") {
               console.log("userdata ", userdata);
+              console.log("hhhhhhhhh", save);
+
               setUserdata(data.user);
             } else {
               alert("Login Again");
@@ -127,7 +142,12 @@ export default function ProfileBubble({ navigation, children }) {
     Animated.timing(scale, { toValue: 1.3, useNativeDriver: true }).start();
     loaddata();
   }, []);
-  return userdata ? (
+
+  if (!save) {
+    return <ActivityIndicator />;
+  }
+
+  return userdata && save ? (
     <View style={styles.root}>
       <Animated.View
         style={[
@@ -141,7 +161,19 @@ export default function ProfileBubble({ navigation, children }) {
 
           { opacity: progress, transform: [{ scale }] },
         ]}
-      ></Animated.View>
+      >
+        <Text
+          style={{
+            color: Colors.pink,
+            paddingHorizontal: size / 3,
+            paddingVertical: size / 5,
+            fontSize: 24,
+            fontFamily: "GothicA1-Medium",
+          }}
+        >
+          Check
+        </Text>
+      </Animated.View>
       <Animated.View
         style={[
           styles.icon,
@@ -198,17 +230,14 @@ export default function ProfileBubble({ navigation, children }) {
         >
           {userdata.profile_pic === "" ? (
             <Ionicons
-              onPress={handleUpload}
+              onPress={pickImage}
               name={"person-outline"}
               color={Colors.white}
               size={44}
             />
           ) : (
-            <TouchableOpacity onPress={handleUpload}>
-              <Image
-                style={styles.profilepic}
-                source={{ uri: userdata.profile_pic }}
-              />
+            <TouchableOpacity onPress={pickImage}>
+              <Image style={styles.profilepic} source={{ uri: image }} />
             </TouchableOpacity>
           )}
         </Animated.View>

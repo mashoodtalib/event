@@ -102,7 +102,7 @@ router.post("/verify", (req, res) => {
   }
 
   User.findOne({ email: email }).then(async (savedUser) => {
-    if (savedUser) {
+    if (!savedUser) {
       return res.status(422).json({ error: "Invalid Credentials" });
     }
     try {
@@ -166,12 +166,12 @@ router.post("/signin", (req, res) => {
 });
 
 router.post("/changepassword", (req, res) => {
-  const { oldpassword, newpassword, email } = req.body;
+  const { oldpassword, newpassword, userName } = req.body;
 
-  if (!oldpassword || !newpassword || !email) {
+  if (!oldpassword || !newpassword || !userName) {
     return res.status(422).json({ error: "Please add all the fields" });
   } else {
-    User.findOne({ email: email }).then(async (savedUser) => {
+    User.findOne({ userName: userName }).then(async (savedUser) => {
       if (savedUser) {
         bcrypt.compare(oldpassword, savedUser.password).then((doMatch) => {
           if (doMatch) {
@@ -226,7 +226,7 @@ router.post("/setusername", (req, res) => {
     return res.status(422).json({ error: "Please add all the fields" });
   }
 
-  User.find({ userName }).then(async (savedUser) => {
+  User.find({ userName: userName }).then(async (savedUser) => {
     if (savedUser.length > 0) {
       return res.status(422).json({ error: "Username already exists" });
     } else {
@@ -294,11 +294,16 @@ router.post("/otheruserdata", (req, res) => {
     let data = {
       _id: saveduser._id,
       userName: saveduser.userName,
+      name: saveduser.name,
       email: saveduser.email,
-      description: saveduser.description,
       profile_pic: saveduser.profile_pic,
+      profile_pic_name: saveduser.profile_pic_name,
+      bio: saveduser.bio,
+      links: saveduser.links,
       followers: saveduser.followers,
       following: saveduser.following,
+      allmessages: saveduser.allmessages,
+      allevents: saveduser.allevents,
     };
 
     // console.log(data);
@@ -309,6 +314,20 @@ router.post("/otheruserdata", (req, res) => {
     });
   });
 });
+router.get("/:userName", (req, res) => {
+  User.findOne({ userName: req.params.userName }, (err, user) => {
+    if (err) {
+      console.log(err);
+    } else if (user) {
+      console.log(user);
+      res.send(user);
+    } else {
+      console.log("User not found");
+      res.send("User not found");
+    }
+  });
+});
+
 router.post("/getuserbyid", (req, res) => {
   const { userid } = req.body;
 
@@ -321,13 +340,17 @@ router.post("/getuserbyid", (req, res) => {
 
       let data = {
         _id: saveduser._id,
-        username: saveduser.username,
+        userName: saveduser.userName,
+        name: saveduser.name,
         email: saveduser.email,
-        description: saveduser.description,
-        profilepic: saveduser.profilepic,
+        profile_pic: saveduser.profile_pic,
+        profile_pic_name: saveduser.profile_pic_name,
+        bio: saveduser.bio,
+        links: saveduser.links,
         followers: saveduser.followers,
         following: saveduser.following,
-        posts: saveduser.posts,
+        allmessages: saveduser.allmessages,
+        allevents: saveduser.allevents,
       };
 
       // console.log(data);
@@ -381,6 +404,80 @@ router.post("/followuser", (req, res) => {
           .catch((err) => {
             return res.status(422).json({ error: "Server Error" });
           });
+      }
+    })
+    .catch((err) => {
+      return res.status(422).json({ error: "Server Error" });
+    });
+});
+router.post("/checkfollow", (req, res) => {
+  const { followfrom, followto } = req.body;
+  console.log(followfrom, followto);
+  if (!followfrom || !followto) {
+    return res.status(422).json({ error: "Invalid Credentials" });
+  }
+  User.findOne({ email: followfrom })
+    .then((mainuser) => {
+      if (!mainuser) {
+        return res.status(422).json({ error: "Invalid Credentials" });
+      } else {
+        let data = mainuser.following.includes(followto);
+        console.log(data);
+        if (data == true) {
+          res.status(200).send({
+            message: "User in following list",
+          });
+        } else {
+          res.status(200).send({
+            message: "User not in following list",
+          });
+        }
+      }
+    })
+    .catch((err) => {
+      return res.status(422).json({ error: "Server Error" });
+    });
+});
+
+// unfollow user
+router.post("/unfollowuser", (req, res) => {
+  const { followfrom, followto } = req.body;
+  console.log(followfrom, followto);
+  if (!followfrom || !followto) {
+    return res.status(422).json({ error: "Invalid Credentials" });
+  }
+  User.findOne({ email: followfrom })
+    .then((mainuser) => {
+      if (!mainuser) {
+        return res.status(422).json({ error: "Invalid Credentials" });
+      } else {
+        if (mainuser.following.includes(followto)) {
+          let index = mainuser.following.indexOf(followto);
+          mainuser.following.splice(index, 1);
+          mainuser.save();
+
+          User.findOne({ email: followto })
+            .then((otheruser) => {
+              if (!otheruser) {
+                return res.status(422).json({ error: "Invalid Credentials" });
+              } else {
+                if (otheruser.followers.includes(followfrom)) {
+                  let index = otheruser.followers.indexOf(followfrom);
+                  otheruser.followers.splice(index, 1);
+                  otheruser.save();
+                }
+                res.status(200).send({
+                  message: "User Unfollowed",
+                });
+              }
+            })
+            .catch((err) => {
+              return res.status(422).json({ error: "Server Error" });
+            });
+        } else {
+          console.log("not following");
+        }
+        // console.log(mainuser);
       }
     })
     .catch((err) => {
