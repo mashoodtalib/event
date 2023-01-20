@@ -6,20 +6,25 @@ import {
   Text,
   View,
   FlatList,
+  ActivityIndicator ,
+  TouchableOpacity,
 } from "react-native";
 import CustomBubble from "../components/Custom-Bubble";
 import Colors from "../constants/colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import apis from "../constants/static-ip";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from '@react-navigation/native';
 
 const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
-export default function Events({ navigation }) {
+const numColumns = width > 600 ? 3 : 2;
+export default function Events() {
   const progress = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0)).current;
   const [text, onChangeText] = React.useState("");
   const [load, setIsLoad] = useState(false);
+  const navigation = useNavigation();
 
   const loaddata = () => {
     // console.log(JSON.parse(data).user.email);
@@ -38,6 +43,7 @@ export default function Events({ navigation }) {
 
         setIsLoad(false);
       });
+      console.log(text);
   };
   useEffect(() => {
     loaddata();
@@ -55,88 +61,43 @@ export default function Events({ navigation }) {
       <View style={styles.root}>
         <Text style={styles.fontDesign}>{"Events"}</Text>
         <View style={styles.container}>
-          <View style={styles.anRoot}>
-            <View style={styles.sm_bubble}>
-              <View
-                style={{
-                  flexDirection: "column",
-                  alignItems: "center",
-                  margin: 5,
-                }}
+        <FlatList
+          data={text}
+          keyExtractor={(item , index) => item.id}
+          renderItem={({ item , index}) => (
+            <TouchableOpacity
+            onPress={() =>
+            navigation.navigate("EventDetails", { item: item })}>
+            <View style={styles.anRoot}>
+              <View style={index%2 == 0 ? styles.sm_bubble : [styles.sm_bubble, { backgroundColor: '#423242' }]}
+
               >
-                <Ionicons name="person-circle" size={28} color={Colors.white} />
-                <Text style={styles.fontDesn}>Testing</Text>
-                <Text style={styles.fontDesn}>Test Name</Text>
-                <Text style={styles.fontDesn}>20-2020-May</Text>
+                <View
+                  style={{
+                    flexDirection: "column",
+                    alignItems: "center",
+                    margin: 5,
+                  }}
+                >
+                  <Ionicons
+                    name="person-circle"
+                    size={28}
+                    color={Colors.white}
+                    />
+                  <Text style={styles.fontDesn}>{item.name}</Text>
+                  <Text style={styles.fontDesn}>{item.date.substring(0,10)}</Text>
+                </View>
               </View>
             </View>
-          </View>
-          <View style={styles.anRoot}>
-            <View style={styles.sm_bubble}>
-              <View
-                style={{
-                  flexDirection: "column",
-                  alignItems: "center",
-                  margin: 5,
-                }}
-              >
-                <Ionicons name="person-circle" size={28} color={Colors.white} />
-                <Text style={styles.fontDesn}>Mashood</Text>
-                <Text style={styles.fontDesn}>Check</Text>
-                <Text style={styles.fontDesn}>5-2022-May</Text>
-              </View>
+            </TouchableOpacity>
+          )}
+          numColumns={numColumns}
+          ListFooterComponent={() => (
+            <View style={{ height: 100 }}>
+              {load && <ActivityIndicator size="large" color={Colors.dark} />}
             </View>
-          </View>
-        </View>
-        <View style={styles.container}>
-          <View style={styles.anRoot}>
-            <View style={styles.sm_bubble}>
-              <View
-                style={{
-                  flexDirection: "column",
-                  alignItems: "center",
-                  margin: 5,
-                }}
-              >
-                <Ionicons name="person-circle" size={28} color={Colors.white} />
-                <Text style={styles.fontDesn}>Testing</Text>
-                <Text style={styles.fontDesn}>Test Name</Text>
-                <Text style={styles.fontDesn}>20-2020-May</Text>
-              </View>
-            </View>
-          </View>
-          <View style={styles.anRoot}>
-            <View style={styles.sm_bubble}>
-              <View
-                style={{
-                  flexDirection: "column",
-                  alignItems: "center",
-                  margin: 5,
-                }}
-              >
-                <Ionicons name="person-circle" size={28} color={Colors.white} />
-                <Text style={styles.fontDesn}>Mashood</Text>
-                <Text style={styles.fontDesn}>Check</Text>
-                <Text style={styles.fontDesn}>5-2022-May</Text>
-              </View>
-            </View>
-          </View>
-          <View style={styles.anRoot}>
-            <View style={styles.sm_bubble}>
-              <View
-                style={{
-                  flexDirection: "column",
-                  alignItems: "center",
-                  margin: 5,
-                }}
-              >
-                <Ionicons name="person-circle" size={28} color={Colors.white} />
-                <Text style={styles.fontDesn}>Mashood</Text>
-                <Text style={styles.fontDesn}>Check</Text>
-                <Text style={styles.fontDesn}>5-2022-May</Text>
-              </View>
-            </View>
-          </View>
+          )}
+        />
         </View>
       </View>
     </CustomBubble>
@@ -145,18 +106,29 @@ export default function Events({ navigation }) {
 
 const styles = StyleSheet.create({
   container: {
-    display: "flex",
-    flexDirection: "row",
-  },
+    flex: 1,
+    overflow: 'scroll'
+},
   anRoot: {
     padding: 12,
   },
   sm_bubble: {
-    height: 90,
-    width: 90,
-    borderRadius: 360,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     backgroundColor: Colors.pink,
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
   },
+  // width: (width - 60) / numColumns,
+  // height: (height - 80) / 3,
+  // backgroundColor: Colors.brown,
+  // borderRadius: 15,
+  // alignItems: "center",
+  // justifyContent: "center",
+  // margin: 10,
+  // flex: 1,
   root: {
     flex: 1,
     padding: 20,

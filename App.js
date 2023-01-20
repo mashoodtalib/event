@@ -24,6 +24,7 @@ import AllFriends from "./screens/all-chats/all-friends";
 import Message from "./screens/all-chats/message";
 import ProfileBubble from "./components/profile-bubble";
 import SendEvents from "./screens/send-events";
+import EventDetails from "./screens/event-details";
 
 const Stack = createNativeStackNavigator();
 export default function AppWrapper() {
@@ -121,6 +122,11 @@ function App() {
         <Stack.Screen
           name="SendEvents"
           component={SendEvents}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="EventDetails"
+          component={EventDetails}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

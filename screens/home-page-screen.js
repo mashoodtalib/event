@@ -13,6 +13,7 @@ import {
   View,
   TouchableOpacity,
 } from "react-native";
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Colors from "../constants/colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Bubble from "../components/Bubble";
@@ -167,12 +168,13 @@ function HomePage({ navigation, route }) {
             { disabledAnimation: true }
           )
         }
-        bubbleStyle={{ top: 60, position: "absolute", zIndex: 1, left: -10 }}
+        bubbleStyle={{
+          top: hp('10%'),
+          position: "absolute", zIndex: 1, left: -10 }}
         styleBubble={{
           backgroundColor: Colors.dark,
-
-          height: 190,
-          width: width < 450 ? 190 : 190,
+          height: hp('23%'),
+          width: wp('49%')
         }}
         iconName={"md-chatbubble-ellipses-outline"}
         textMessage={selectLan == 0 ? language[0].eng : language[0].arab}
@@ -184,11 +186,12 @@ function HomePage({ navigation, route }) {
         onpress={() => navigation.push("Settings", { disabledAnimation: true })}
         styleBubble={{
           backgroundColor: Colors.orange,
-
-          height: 130,
-          width: width < 450 ? 130 : 130,
+          height: hp('15%'),
+          width: wp('32%')
         }}
-        bubbleStyle={{ top: 30, position: "absolute", zIndex: 1, right: -5 }}
+        bubbleStyle={{
+          top: hp('8%')
+          , position: "absolute", zIndex: 1, right: -5 }}
         iconName={"md-settings-outline"}
         textMessage={selectLan == 0 ? language[1].eng : language[1].arab}
         iconSize={42}
@@ -199,12 +202,14 @@ function HomePage({ navigation, route }) {
         onpress={() =>
           navigation.push("CreateEvent", { disabledAnimation: true })
         }
-        bubbleStyle={{ top: 200, position: "absolute", zIndex: 1, right: -20 }}
+        bubbleStyle={{
+
+          top: hp('35%'),
+          position: "absolute", zIndex: 1, right: -20 }}
         styleBubble={{
           backgroundColor: Colors.brown,
-
-          height: 210,
-          width: width < 450 ? 210 : 210,
+          height: hp('23%'),
+          width: wp('49%')
         }}
         iconName={"add-sharp"}
         textMessage={selectLan == 0 ? language[2].eng : language[2].arab}
@@ -216,12 +221,13 @@ function HomePage({ navigation, route }) {
         onpress={() =>
           navigation.navigate("ProfileScreen", { disabledAnimation: true })
         }
-        bubbleStyle={{ top: 305, position: "absolute", zIndex: 1, left: -30 }}
+        bubbleStyle={{
+          top: hp('45%')
+          , position: "absolute", zIndex: 1, left: -30 }}
         styleBubble={{
           backgroundColor: Colors.pink,
-
-          height: 210,
-          width: width < 450 ? 210 : 210,
+          height: hp('23%'),
+          width: wp('49%')
         }}
         iconName={"person-outline"}
         textMessage={selectLan == 0 ? language[3].eng : language[3].arab}
@@ -231,12 +237,13 @@ function HomePage({ navigation, route }) {
       />
       <Bubble
         onpress={() => navigation.push("Events", { disabledAnimation: true })}
-        bubbleStyle={{ top: 445, position: "absolute", zIndex: 1, right: 2 }}
+        bubbleStyle={{
+          top: hp('65%')
+          , position: "absolute", zIndex: 1, right: 2 }}
         styleBubble={{
           backgroundColor: Colors.dark,
-
-          height: 160,
-          width: width < 450 ? 160 : 160,
+          height: hp('23%'),
+          width: wp('49%')
         }}
         iconName={"calendar-outline"}
         textMessage={selectLan == 0 ? language[4].eng : language[4].arab}
@@ -246,12 +253,13 @@ function HomePage({ navigation, route }) {
       />
       <Bubble
         onpress={() => navigation.push("search", { disabledAnimation: true })}
-        bubbleStyle={{ top: 530, position: "absolute", zIndex: 1, left: 25 }}
+        bubbleStyle={{
+          top: hp('75%')
+          , position: "absolute", zIndex: 1, left: 25 }}
         styleBubble={{
           backgroundColor: Colors.orange,
-
-          height: 140,
-          width: width < 450 ? 140 : 140,
+          height: hp('15%'),
+          width: wp('32%')
         }}
         iconName={"search-outline"}
         textMessage={selectLan == 0 ? language[5].eng : language[5].arab}
