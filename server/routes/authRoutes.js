@@ -127,7 +127,7 @@ router.post("/verify", (req, res) => {
 });
 
 router.post("/signin", (req, res) => {
-  const { userName, password } = req.body;
+  const { userName, password, email } = req.body;
 
   if (!userName || !password) {
     return res.status(422).json({ error: "Please add all the fields" });
@@ -144,13 +144,26 @@ router.post("/signin", (req, res) => {
                 { _id: savedUser._id },
                 process.env.JWT_SECRET
               );
-
-              const { _id, userName, password } = savedUser;
+              // let data = {
+              //   _id: saveduser._id,
+              //   userName: saveduser.userName,
+              //   name: saveduser.name,
+              //   email: saveduser.email,
+              //   profile_pic: saveduser.profile_pic,
+              //   profile_pic_name: saveduser.profile_pic_name,
+              //   bio: saveduser.bio,
+              //   links: saveduser.links,
+              //   followers: saveduser.followers,
+              //   following: saveduser.following,
+              //   allmessages: saveduser.allmessages,
+              //   allevents: saveduser.allevents,
+              // };
+              const { _id, userName, password, email } = savedUser;
 
               res.json({
                 message: "Successfully Signed In",
                 token,
-                user: { _id, userName, password },
+                user: { _id, userName, password, email },
               });
             } else {
               return res.status(422).json({ error: "Invalid Credentials" });
@@ -315,6 +328,7 @@ router.post("/otheruserdata", (req, res) => {
   });
 });
 router.get("/:userName", (req, res) => {
+  console.log(req.params.userName);
   User.findOne({ userName: req.params.userName }, (err, user) => {
     if (err) {
       console.log(err);

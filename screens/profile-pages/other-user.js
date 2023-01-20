@@ -58,6 +58,7 @@ export default function OtherUser({ navigation, route }) {
   const { user } = route.params;
   // console.log(user)
   const loaddata = async () => {
+    console.log(user.email);
     fetch(apis + "otheruserdata", {
       method: "POST",
       headers: {

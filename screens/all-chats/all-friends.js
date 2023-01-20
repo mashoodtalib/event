@@ -30,7 +30,7 @@ import apis from "../../constants/static-ip";
 export default function AllFriends({ navigation, route }) {
   const [error, setError] = useState(null);
   const [userdataagain, setUserdataagain] = React.useState([]);
-  const { data } = route.params;
+  // const { data } = route.params;
   const [selectLan, setSelectLan] = useState(0);
 
   const getLang = async () => {
@@ -41,6 +41,7 @@ export default function AllFriends({ navigation, route }) {
     try {
       await AsyncStorage.getItem("user")
         .then(async (value) => {
+          console.log(JSON.parse(value).user.email);
           fetch(apis + `${JSON.parse(value).user.userName}`)
             .then((res) => res.json())
             .then((dat) => {
@@ -90,34 +91,34 @@ export default function AllFriends({ navigation, route }) {
       });
     }
   }, [array]);
-  useEffect(() => {
-    if (array) {
-      array.followers.forEach((item) => {
-        console.log(item);
-        const fetchData2 = async () => {
-          try {
-            const res = await fetch(apis + `otheruserdata`, {
-              method: "POST",
+  // useEffect(() => {
+  //   if (array) {
+  //     array.followers.forEach((item) => {
+  //       console.log(item);
+  //       const fetchData2 = async () => {
+  //         try {
+  //           const res = await fetch(apis + `otheruserdata`, {
+  //             method: "POST",
 
-              body: JSON.stringify({ email: item }),
+  //             body: JSON.stringify({ email: item }),
 
-              headers: {
-                "Content-Type": "application/json",
-              },
-            });
-            const data = await res.json();
-            console.log(data);
+  //             headers: {
+  //               "Content-Type": "application/json",
+  //             },
+  //           });
+  //           const data = await res.json();
+  //           console.log(data);
 
-            setUserdataagain((prevData2) => [...prevData2, data]);
-          } catch (err) {
-            console.error(err);
-            setError(err);
-          }
-        };
-        fetchData2();
-      });
-    }
-  }, [array]);
+  //           setUserdataagain((prevData2) => [...prevData2, data]);
+  //         } catch (err) {
+  //           console.error(err);
+  //           setError(err);
+  //         }
+  //       };
+  //       fetchData2();
+  //     });
+  //   }
+  // }, [array]);
 
   if (error) {
     return (

@@ -116,7 +116,7 @@ function CreateEventScreen({ navigation }) {
             eventId: JSON.parse(data).user._id,
             name: text,
             date: date,
-            isPrivate: isActive,
+            isPrivate: isActive == 1 ? false : true,
           }),
         })
           .then((res) => res.json())
@@ -131,7 +131,7 @@ function CreateEventScreen({ navigation }) {
                   id: JSON.parse(data).user._id,
                   name: text,
                   date: date,
-                  isPrivate: isActive,
+                  isPrivate: isActive == 1 ? false : true,
                 }),
               })
                 .then((res) => res.json())

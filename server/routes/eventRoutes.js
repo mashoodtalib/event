@@ -20,7 +20,7 @@ io.on("connection", (socket) => {
 });
 router.post("/addevent", async (req, res) => {
   console.log("sent by client - ", req.body);
-  return
+  // return
   const { eventId, name, date, isPrivate } = req.body;
 
   const event = new Event({
@@ -76,9 +76,9 @@ router.post("/setuserevents", async (req, res) => {
 });
 
 router.post("/events", (req, res) => {
-  const { isPrivate } = req.body;
-  console.log("isPrivate - ", isPrivate);
-  Event.find({ isPrivate : isPrivate }, (err, events) => {
+  // const { isPrivate } = req.body;
+  console.log("isPrivate - ", 0);
+  Event.find({}, (err, events) => {
     if (err) return res.status(500).send(err);
     return res.status(200).send(events);
   });

@@ -22,10 +22,11 @@ export default function LoginScreen({ navigation }) {
   const [loading, setLoading] = React.useState(false);
 
   const [userName, setuserName] = React.useState("");
+  const [email, setMail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [errormsg, setErrormsg] = React.useState(null);
   const Sendtobackend = () => {
-    if (userName == "" || password == "") {
+    if (userName == "" || password == "" || email == "") {
       alert("Please enter userName and password");
     } else {
       setLoading(true);
@@ -37,6 +38,7 @@ export default function LoginScreen({ navigation }) {
         body: JSON.stringify({
           userName,
           password,
+          email,
         }),
       })
         .then((res) => res.json())
@@ -65,8 +67,8 @@ export default function LoginScreen({ navigation }) {
     <LinearGradientComponent>
       <View style={styles.rootScreen}>
         <View style={styles.textInputField}>
-        <Text style={styles.text}>Play</Text>
-        <Text style={styles.textLife}>Your Life</Text>
+          <Text style={styles.text}>Play</Text>
+          <Text style={styles.textLife}>Your Life</Text>
         </View>
         {errormsg ? <Text style={styles.errormessage}>{errormsg}</Text> : null}
         <TextInput
@@ -75,6 +77,14 @@ export default function LoginScreen({ navigation }) {
           onChangeText={(text) => setuserName(text)}
           placeholder="userName"
           autoCorrect={false}
+        />
+        <TextInput
+          style={styles.input}
+          onPressIn={() => setErrormsg(null)}
+          onChangeText={(text) => setMail(text)}
+          placeholder="Email"
+          autoCorrect={false}
+          keyboardType={"email-address"}
         />
 
         <TextInput
