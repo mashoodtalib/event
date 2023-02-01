@@ -29,6 +29,8 @@ const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
 function HomePage({ navigation, route }) {
   const [selectLan, setSelectLan] = useState(0);
+  const [leftBubbleAnim, setLeftBubbleAnim] = useState(new Animated.Value(0));
+  const [rightBubbleAnim, setRightBubbleAnim] = useState(new Animated.Value(0));
   const { data } = route.params;
   AsyncStorage.getItem("user")
     .then((data) => {
@@ -44,6 +46,7 @@ function HomePage({ navigation, route }) {
   const getLang = async () => {
     setSelectLan(parseInt(await AsyncStorage.getItem("LANG")));
   };
+<<<<<<< HEAD
   const [userdata, setUserdata] = React.useState(null);
   const [save, setSave] = React.useState(null);
 
@@ -83,127 +86,30 @@ function HomePage({ navigation, route }) {
         navigation.push("Login");
       });
   };
+=======
+  useEffect(() => {
+    Animated.timing(leftBubbleAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+    }).start();
+    Animated.timing(rightBubbleAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+    }).start();
+}, []);
+>>>>>>> 2e911a19931be83c6972eee9c6c6ddfceb375728
 
   return (
     <View style={{ flex: 1, height: height }}>
-      {/* <View style={styles.firstContainer}>
-        <Bubble
-          onpress={() =>
-            navigation.navigate(
-              "allFriends",
-              { data: data },
-
-              { disabledAnimation: true }
-            )
-          }
-          styleBubble={{
-            backgroundColor: Colors.dark,
-
-            height: 190,
-            width: width < 450 ? 190 : 190,
-          }}
-          iconName={"md-chatbubble-ellipses-outline"}
-          textMessage={selectLan == 0 ? language[0].eng : language[0].arab}
-          iconSize={48}
-          iconColor={Colors.pink}
-          textStyle={styles.text}
-        />
-        <Bubble
-          onpress={() =>
-            navigation.push("Settings", { disabledAnimation: true })
-          }
-          styleBubble={{
-            backgroundColor: Colors.orange,
-
-            height: 130,
-            width: width < 450 ? 130 : 130,
-          }}
-          iconName={"md-settings-outline"}
-          textMessage={selectLan == 0 ? language[1].eng : language[1].arab}
-          iconSize={42}
-          iconColor={Colors.dark}
-          textStyle={styles.textone}
-        />
-      </View>
-      <View style={styles.secondContainer}>
-        <Bubble
-          onpress={() =>
-            navigation.navigate(
-              "allFriends",
-              { data: data },
-
-              { disabledAnimation: true }
-            )
-          }
-          styleBubble={{
-            backgroundColor: Colors.dark,
-
-            height: 190,
-            width: width < 450 ? 190 : 190,
-          }}
-          iconName={"md-chatbubble-ellipses-outline"}
-          textMessage={selectLan == 0 ? language[0].eng : language[0].arab}
-          iconSize={48}
-          iconColor={Colors.pink}
-          textStyle={styles.text}
-        />
-        <Bubble
-          onpress={() =>
-            navigation.push("Settings", { disabledAnimation: true })
-          }
-          styleBubble={{
-            backgroundColor: Colors.orange,
-
-            height: 130,
-            width: width < 450 ? 130 : 130,
-          }}
-          iconName={"md-settings-outline"}
-          textMessage={selectLan == 0 ? language[1].eng : language[1].arab}
-          iconSize={42}
-          iconColor={Colors.dark}
-          textStyle={styles.textone}
-        />
-      </View>
-      <View style={styles.thirdContainer}>
-        <Bubble
-          onpress={() =>
-            navigation.navigate(
-              "allFriends",
-              { data: data },
-
-              { disabledAnimation: true }
-            )
-          }
-          styleBubble={{
-            backgroundColor: Colors.dark,
-
-            height: 190,
-            width: width < 450 ? 190 : 190,
-          }}
-          iconName={"md-chatbubble-ellipses-outline"}
-          textMessage={selectLan == 0 ? language[0].eng : language[0].arab}
-          iconSize={48}
-          iconColor={Colors.pink}
-          textStyle={styles.text}
-        />
-        <Bubble
-          onpress={() =>
-            navigation.push("Settings", { disabledAnimation: true })
-          }
-          styleBubble={{
-            backgroundColor: Colors.orange,
-
-            height: 130,
-            width: width < 450 ? 130 : 130,
-          }}
-          iconName={"md-settings-outline"}
-          textMessage={selectLan == 0 ? language[1].eng : language[1].arab}
-          iconSize={42}
-          iconColor={Colors.dark}
-          textStyle={styles.textone}
-        />
-      </View> */}
       <Bubble
+      style={{
+        left: leftBubbleAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [-width, 0],
+      }),
+      }}
         onpress={() =>
           navigation.navigate(
             "allFriends",
@@ -229,6 +135,12 @@ function HomePage({ navigation, route }) {
         textStyle={styles.text}
       />
       <Bubble
+        style={{
+          right: rightBubbleAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [-width, 0],
+          }),
+      }}
         onpress={() => navigation.push("Settings", { disabledAnimation: true })}
         styleBubble={{
           backgroundColor: Colors.orange,
