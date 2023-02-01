@@ -18,11 +18,13 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ImagePicker from "expo-image-picker";
 
 const socket = io("http://192.168.100.7:3001");
 import CustomBubble from "../../components/Custom-Bubble";
 import Colors from "../../constants/colors";
 import apis from "../../constants/static-ip";
+
 const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
 
@@ -36,16 +38,53 @@ export default function Message({ navigation, route }) {
   const [userid, setUserid] = React.useState(null);
   const [roomid, setRoomid] = React.useState(null);
   const [chat, setChat] = React.useState([""]);
+  const [image, setImage] = useState(null);
+  const [currentmessage, setCurrentmessage] = React.useState(null);
 
   // OUR ID & ROOM ID FOR SOCKET.IO
+  const handleImageUpload = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
+    if (status !== "granted") {
+      alert("Sorry, we need camera roll permissions to make this work!");
+    }
+
+    if (status === "granted") {
+      const response = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+      });
+
+      if (!response.canceled) {
+        //  setProfileImage(response.assets[0]);
+        console.log(response.assets[0].uri);
+        setImage({
+          uri: response.assets[0].uri,
+          type: response.assets[0].type,
+          name: response.assets[0].fileName,
+        });
+        //socket.emit("send_message", currentmessage);
+      }
+    }
+  };
+  // const handleSend = () => {
+  //   const { uri, type, name } = profileImage;
+
+  //   const payload = {
+  //     uri,
+  //     type,
+  //     name,
+  //   };
+
+  //   socket.emit("send-image", payload);
+  // };
   useEffect(() => {
     loaddata();
   }, []);
 
   useEffect(() => {
     socket.on("receive_message", (data) => {
-      console.log("recieved message - ", data);
+      // console.log("recieved message - ", data);
       loadMessages(roomid);
     });
   }, [socket]);
@@ -149,7 +188,23 @@ export default function Message({ navigation, route }) {
       .then((res) => res.json())
       .then((data) => {
         if (data.message == "Message saved successfully") {
-          socket.emit("send_message", messagedata);
+          if (currentmessage) {
+            socket.emit("send_message", messagedata);
+          }
+          if (image) {
+            const { uri } = image;
+            console.log(uri);
+            const formData = new FormData();
+            formData.append("image", {
+              uri,
+              name: "image.jpg",
+              type: "image/jpeg",
+            });
+
+            socket.emit("send-image", formData);
+            setImage(null);
+          }
+
           loadMessages(roomid);
           console.log("message sent");
 
@@ -179,8 +234,6 @@ export default function Message({ navigation, route }) {
         console.log(err);
       });
   };
-
-  const [currentmessage, setCurrentmessage] = React.useState(null);
 
   const loadMessages = (temproomid) => {
     fetch(apis + "getmessages", {
@@ -239,9 +292,12 @@ export default function Message({ navigation, route }) {
         </Text>
         <ScrollView style={styles.messageView}>
           {chat.map((item, index) => {
+            const type = item.type || "text";
+            const img = item.type || "image";
+
             return (
               <View style={styles.message} key={index}>
-                {item.senderid == userid && (
+                {item.senderid == userid && type === "text" && (
                   <View style={styles.messageRight}>
                     <Ionicons
                       style={{
@@ -254,7 +310,7 @@ export default function Message({ navigation, route }) {
                     <Text style={styles.messageTextRight}>{item.message}</Text>
                   </View>
                 )}
-                {item.senderid != userid && item != "" && (
+                {item.senderid != userid && type === "text" && item != "" && (
                   <View style={styles.messageLeft}>
                     <Ionicons
                       style={{
@@ -267,6 +323,39 @@ export default function Message({ navigation, route }) {
                     <Text style={styles.messageTextLeft}>{item.message}</Text>
                   </View>
                 )}
+
+                {item.senderid == userid && type === "image" && (
+                  <View style={styles.messageRight}>
+                    <Ionicons
+                      style={{
+                        marginVertical: 10,
+                      }}
+                      name="person-circle-outline"
+                      color={Colors.white}
+                      size={38}
+                    />
+                    <Image
+                      style={{ width: 100, height: 100 }}
+                      source={{ uri: item.message }}
+                    />
+                  </View>
+                )}
+                {item.senderid != userid && type === "image" && item != "" && (
+                  <View style={styles.messageLeft}>
+                    <Ionicons
+                      style={{
+                        marginVertical: 10,
+                      }}
+                      name="person-circle-outline"
+                      color={Colors.white}
+                      size={38}
+                    />
+                    <Image
+                      style={{ width: 100, height: 100 }}
+                      source={{ uri: item.message }}
+                    />
+                  </View>
+                )}
               </View>
             );
           })}
@@ -276,12 +365,18 @@ export default function Message({ navigation, route }) {
             flexDirection: "row",
           }}
         >
+          <Ionicons
+            onPress={handleImageUpload}
+            name="add-circle"
+            color={Colors.brown}
+            size={22}
+          />
           <TextInput
             style={styles.input}
             onChangeText={(text) => setCurrentmessage(text)}
             value={currentmessage}
           />
-          {currentmessage ? (
+          {currentmessage || image ? (
             <Ionicons
               name="send"
               color={Colors.pink}
@@ -300,7 +395,7 @@ export default function Message({ navigation, route }) {
 const styles = StyleSheet.create({
   input: {
     height: 25,
-    width: size / 2,
+    width: size / 2.5,
     fontWeight: "500",
     fontFamily: "GothicA1-Bold",
     backgroundColor: Colors.pink,

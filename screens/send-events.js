@@ -15,9 +15,13 @@ import {
   Pressable,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
 import React, { useEffect, useState } from "react";
+import io from "socket.io-client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const socket = io("http://192.168.100.7:3002");
 import CustomBubble from "../components/Custom-Bubble";
 import Colors from "../constants/colors";
 const { width, height } = Dimensions.get("window");
@@ -26,16 +30,113 @@ import axios from "axios";
 import { language } from "../constants/language";
 import { Path, Svg } from "react-native-svg";
 import apis from "../constants/static-ip";
-
+import { useRef } from "react";
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
 export default function SendEvents({ navigation, route }) {
   const [error, setError] = useState(null);
   const [userdataagain, setUserdataagain] = React.useState([]);
   const { data } = route.params;
   const [selectLan, setSelectLan] = useState(0);
+  const [selected, setSelected] = useState([]);
+  // const handleSend = () => {
+  //   socket.on("send-data", selected);
+  //   console.log(selected);
+  // };
+  const handleSelect = (item) => {
+    if (selected.includes(item)) {
+      setSelected(selected.filter((i) => i !== item));
+    } else {
+      setSelected([...selected, item]);
+    }
+  };
 
   const getLang = async () => {
     setSelectLan(parseInt(await AsyncStorage.getItem("LANG")));
   };
+  const [expoPushToken, setExpoPushToken] = useState("");
+  const [notification, setNotification] = useState(false);
+  const notificationListener = useRef();
+  const responseListener = useRef();
+
+  useEffect(() => {
+    registerForPushNotificationsAsync().then((token) =>
+      setExpoPushToken(token)
+    );
+
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        setNotification(notification);
+      });
+
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log(response);
+      });
+
+    return () => {
+      Notifications.removeNotificationSubscription(
+        notificationListener.current
+      );
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
+
+  const [date, setDate] = useState(new Date("April-20-2000"));
+
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setDate(currentDate);
+  };
+
+  const showMode = (currentMode) => {
+    DateTimePickerAndroid.open({
+      value: date,
+      onChange,
+      mode: currentMode,
+      is24Hour: true,
+    });
+  };
+  async function registerForPushNotificationsAsync() {
+    let token;
+
+    if (Platform.OS === "android") {
+      await Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+      });
+    }
+
+    if (Device.isDevice) {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== "granted") {
+        alert("Failed to get push token for push notification!");
+        return;
+      }
+      token = (await Notifications.getExpoPushTokenAsync()).data;
+      console.log(token);
+    } else {
+      alert("Must use physical device for Push Notifications");
+    }
+
+    return token;
+  }
+  useEffect(() => {
+    // const socket = io("http://192.168.100.7:3002");
+  }, []);
   const [array, setArray] = useState(null);
   const fetchArray = async () => {
     try {
@@ -54,6 +155,46 @@ export default function SendEvents({ navigation, route }) {
     } catch (err) {
       setError(err);
       console.log(err);
+    }
+  };
+  const handleSend = async () => {
+    try {
+      console.log("sss", selected);
+      await fetch(apis + "send-data", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          selected: selected,
+        }),
+      })
+        .then((res) => {
+          res.json();
+          console.log(res.json());
+          //   socket.emit("send-data", selected);
+          socket.on("broadcast-selected-data", (selectedData) => {
+            Notifications.scheduleNotificationAsync({
+              content: {
+                title: data,
+                body: "New Event Created",
+                // data: { data: navigation.push("EventDetails", { item: event }) },
+                data: { data: selectedData },
+              },
+              trigger: { seconds: 2 },
+            });
+
+            // Alert.alert("New Event", `A new event "${event.name}" has been created!`);
+          });
+          alert("New Event Has been sent");
+          navigation.navigate("HomePage", { disabledAnimation: true });
+        })
+
+        .catch((err) => console.log(err));
+
+      // console.log(response.data);
+    } catch (error) {
+      console.error(error);
     }
   };
   useEffect(() => {
@@ -90,34 +231,34 @@ export default function SendEvents({ navigation, route }) {
       });
     }
   }, [array]);
-  useEffect(() => {
-    if (array) {
-      array.followers.forEach((item) => {
-        console.log(item);
-        const fetchData2 = async () => {
-          try {
-            const res = await fetch(apis + `otheruserdata`, {
-              method: "POST",
+  // useEffect(() => {
+  //   if (array) {
+  //     array.followers.forEach((item) => {
+  //       console.log(item);
+  //       const fetchData2 = async () => {
+  //         try {
+  //           const res = await fetch(apis + `otheruserdata`, {
+  //             method: "POST",
 
-              body: JSON.stringify({ email: item }),
+  //             body: JSON.stringify({ email: item }),
 
-              headers: {
-                "Content-Type": "application/json",
-              },
-            });
-            const data = await res.json();
-            console.log(data);
+  //             headers: {
+  //               "Content-Type": "application/json",
+  //             },
+  //           });
+  //           const data = await res.json();
+  //           console.log(data);
 
-            setUserdataagain((prevData2) => [...prevData2, data]);
-          } catch (err) {
-            console.error(err);
-            setError(err);
-          }
-        };
-        fetchData2();
-      });
-    }
-  }, [array]);
+  //           setUserdataagain((prevData2) => [...prevData2, data]);
+  //         } catch (err) {
+  //           console.error(err);
+  //           setError(err);
+  //         }
+  //       };
+  //       fetchData2();
+  //     });
+  //   }
+  // }, [array]);
 
   if (error) {
     return (
@@ -168,66 +309,68 @@ export default function SendEvents({ navigation, route }) {
   }
 
   function Item({ item, index }) {
+    const backg = selected.includes(item) ? Colors.dark : Colors.brown;
+
     console.log(item);
     return (
-      <View
-        style={[
-          { marginLeft: 30 },
-          { marginTop: 30 },
-          index % 2 ? styles.secondColumn : styles.firstcolumn,
-        ]}
-      >
+      <View style={[{ marginTop: 10 }, { marginHorizontal: 30 }]}>
         <Pressable
-          onPress={() => navigation.navigate("Messages", { data: item })}
+          style={{
+            backgroundColor: backg,
+            borderRadius: 20,
+          }}
+          onPress={() => handleSelect(item)}
         >
-          <Image
-            style={{
-              height: 90,
-              width: 90,
-              tintColor: index % 2 ? Colors.brown : Colors.orange,
-            }}
-            source={require("../assets/chat-bubll.png")}
-          />
-          <Ionicons
-            style={{
-              marginTop: 10,
-              textAlign: "center",
-
-              left: 14,
-              overflow: "hidden",
-              right: 14,
-              position: "absolute",
-            }}
-            name={"person-circle-outline"}
-            color={Colors.white}
-            size={28}
-          />
-          <Text
-            style={[
-              {
-                marginTop: 30,
-                color: Colors.black,
-                textAlign: "center",
-                fontFamily: "GothicA1-Medium",
-                left: 14,
-                top: 11,
-                overflow: "hidden",
-                right: 14,
-                fontSize: 12,
-                position: "absolute",
-              },
-            ]}
+          <View
+            style={{ flex: 1, flexDirection: "row", alignItems: "flex-start" }}
           >
-            @{item.user.userName}
-          </Text>
+            {item.user.profile_pic_name != "" ? (
+              <Image
+                style={{ height: "100%", width: "100%" }}
+                source={{ uri: item.user.profile_pic_name }}
+              />
+            ) : (
+              <Ionicons
+                name="person-circle-outline"
+                size={50}
+                color={Colors.white}
+              />
+            )}
+            <View
+              style={{
+                flexDirection: "column",
+                alignItems: "flex-start",
+                marginLeft: 4,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 20,
+                  color: Colors.pink,
+                  fontFamily: "GothicA1-Regular",
+                }}
+              >
+                {item.user.name}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 20,
+                  color: Colors.pink,
+                  fontFamily: "GothicA1-Regular",
+                }}
+              >
+                {item.user.userName}
+              </Text>
+            </View>
+          </View>
         </Pressable>
       </View>
     );
   }
   return (
     <CustomBubble
-      bubbleColor={Colors.dark}
-      crossColor={Colors.brown}
+      bubbleColor={Colors.brown}
+      crossColor={Colors.pink}
       navigation={navigation}
     >
       <View style={styles.container}>
@@ -242,19 +385,27 @@ export default function SendEvents({ navigation, route }) {
             },
           ]}
         >
-          {selectLan == 0 ? language[0].eng : language[0].arab}
+          {"Choose\nFriends"}
         </Text>
       </View>
       <View style={styles.container}>
         <FlatList
           style={styles.userlists}
           data={userdataagain}
-          numColumns={2}
           keyExtractor={(_, item) => item.user}
           renderItem={({ item, index }) => {
             return <Item item={item} index={index} />;
           }}
+          extraData={selected}
         />
+        <Pressable
+          style={[styles.dateIn, { height: 25, width: 50, marginTop: 8 }]}
+          onPress={() => {
+            handleSend();
+          }}
+        >
+          <Text style={styles.fontDesign1}>Send</Text>
+        </Pressable>
       </View>
     </CustomBubble>
   );
@@ -270,7 +421,7 @@ const styles = StyleSheet.create({
   },
   userlists: {
     width: "100%",
-    marginTop: 20,
+    marginTop: 10,
     alignContent: "center",
     height: "55%",
   },
@@ -288,5 +439,30 @@ const styles = StyleSheet.create({
   bubble: {
     alignItems: "center",
     padding: 10,
+  },
+  fontDesign1: {
+    fontFamily: "GothicA1-Regular",
+    color: Colors.white,
+  },
+  title: {
+    textAlign: "center",
+    fontSize: 20,
+    fontWeight: "bold",
+    padding: 20,
+  },
+  datePickerStyle: {
+    width: 200,
+    marginTop: 20,
+  },
+  dateIn: {
+    margin: 5,
+    alignItems: "center",
+    backgroundColor: Colors.pink,
+    borderRadius: 24,
+    borderColor: Colors.pink,
+    color: Colors.white,
+    borderBottomColor: Colors.pink,
+    borderBottomColor: "#000",
+    overflow: "hidden",
   },
 });

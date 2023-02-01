@@ -11,59 +11,85 @@ const bcrypt = require("bcrypt");
 const path = require("path");
 const fs = require("fs");
 
+fs.access("uploads", fs.constants.R_OK, (err) => {
+  if (err) {
+    fs.mkdirSync("uploads");
+    const uploadsPath = path.resolve("uploads");
+    console.log(uploadsPath);
+    console.log("file is not readable");
+  } else {
+    console.log("file is readable");
+    const uploadsPath = path.resolve("uploads");
+    console.log(uploadsPath);
+  }
+});
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/");
+    cb(null, "uploads");
   },
   filename: function (req, file, cb) {
-    cb(null, new Date().toISOString() + file.originalname);
+    cb(null, file.originalname);
   },
 });
 const upload = multer({ storage: storage });
 
 router.post("/uploadimage", upload.single("image"), async (req, res) => {
   const { email } = req.body;
-  const saveImage = User.findOne(
-    { email: email },
-    {
-      profile_pic_name: req.body.name,
-      profile_pic: {
-        data: fs.readFileSync("uploads/" + req.file.filename),
-        contentType: "image/png",
-      },
+  console.log(req.file.filename);
+  try {
+    // const filepath = path.join(__dirname, "uploads", req.file.originalname);
+    // console.log(filepath);
+    if (!req.file) {
+      res.send({ code: 500, msg: "err" });
+    } else {
+      fs.readFile(
+        "E:/React-Project/event/server/uploads/" + req.file.filename,
+        "base64",
+        function (err, data) {
+          if (err) throw err;
+          res.send(data);
+        }
+      );
+      User.findOneAndUpdate(
+        email,
+        {
+          profile_pic_name:
+            "E:/React-Project/event/server/uploads/" + req.file.filename,
+        },
+        (err, savedUser) => {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log(savedUser);
+            savedUser.save();
+
+            res.send({ code: 200, msg: "Success" });
+          }
+        }
+      );
+      // User.findByIdAndUpdate({ _id: userId }).then((savedUser) => {
+      //   console.log(savedUser);
+      //   savedUser.profile_pic_name = req.file.originalname;
+      //   savedUser.save();
+      // });
+      // res.send({ code: 200, msg: "Success" });
     }
-  );
-  saveImage
-    .save()
-    .then((res) => {
-      console.log("image is saved");
-    })
-    .catch((err) => {
-      console.log(err, "eror occured");
-    });
+  } catch (err) {
+    res.status(500).json({ message: err });
+  }
 });
-
-router.post("/addpost", (req, res) => {
-  const { email, post, postdescription } = req.body;
-
-  User.findOne({ email: email })
-    .then((savedUser) => {
-      if (!savedUser) {
-        return res.status(422).json({ error: "Invalid Credentials" });
-      }
-      savedUser.posts.push({ post, postdescription, likes: [], comments: [] });
-      savedUser
-        .save()
-        .then((user) => {
-          res.json({ message: "Post added successfully" });
-        })
-        .catch((err) => {
-          res.json({ error: "Error adding post" });
-        });
-    })
-    .catch((err) => {
+router.post("/id", (req, res) => {
+  console.log(req.params._id);
+  User.findOne({ _id: req.body.id }, (err, user) => {
+    if (err) {
       console.log(err);
-    });
+    } else if (user) {
+      console.log(user.profile_pic_name);
+      res.send(user.profile_pic_name);
+    } else {
+      console.log("User not found");
+      res.send("User not found");
+    }
+  });
 });
-
 module.exports = router;

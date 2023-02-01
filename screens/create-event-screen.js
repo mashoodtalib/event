@@ -3,6 +3,8 @@ import RadioButton, {
   RadioButtonInput,
   RadioButtonLabel,
 } from "react-native-simple-radio-button";
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
 
 //import CalendarPicker from "react-native-calendar-picker";
 import DatePicker, {
@@ -37,6 +39,13 @@ import apis from "../constants/static-ip";
 const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
 function CreateEventScreen({ navigation }) {
   const [isActive, setIsActive] = useState();
   const [load, setIsLoad] = useState(false);
@@ -55,6 +64,33 @@ function CreateEventScreen({ navigation }) {
     "Nov",
     "Dec",
   ];
+  const [expoPushToken, setExpoPushToken] = useState("");
+  const [notification, setNotification] = useState(false);
+  const notificationListener = useRef();
+  const responseListener = useRef();
+
+  useEffect(() => {
+    registerForPushNotificationsAsync().then((token) =>
+      setExpoPushToken(token)
+    );
+
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        setNotification(notification);
+      });
+
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log(response);
+      });
+
+    return () => {
+      Notifications.removeNotificationSubscription(
+        notificationListener.current
+      );
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
 
   const [date, setDate] = useState(new Date("April-20-2000"));
 
@@ -71,19 +107,58 @@ function CreateEventScreen({ navigation }) {
       is24Hour: true,
     });
   };
-  // useEffect(() => {
-  //   const socket = io("http://192.168.100.7:3002");
-  //   socket.on("newEvent", (event) => {
-  //     Alert.alert("New Event", `A new event "${event.name}" has been created!`);
-  //   });
-  //   return () => {
-  //     socket.disconnect();
-  //   };
-  // }, []);
+  async function registerForPushNotificationsAsync() {
+    let token;
+
+    if (Platform.OS === "android") {
+      await Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+      });
+    }
+
+    if (Device.isDevice) {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== "granted") {
+        alert("Failed to get push token for push notification!");
+        return;
+      }
+      token = (await Notifications.getExpoPushTokenAsync()).data;
+      console.log(token);
+    } else {
+      alert("Must use physical device for Push Notifications");
+    }
+
+    return token;
+  }
+  useEffect(() => {
+    // const socket = io("http://192.168.100.7:3002");
+    socket.on("eventName", (event) => {
+      Notifications.scheduleNotificationAsync({
+        content: {
+          title: event.name,
+          body: event.date,
+          data: { data: navigation.push("EventDetails", { item: event }) },
+          //  data: { data: "hoes" },
+        },
+        trigger: { seconds: 2 },
+      });
+
+      // Alert.alert("New Event", `A new event "${event.name}" has been created!`);
+    });
+  }, []);
   const showDatepicker = () => {
     showMode("date");
   };
-  const d = new Date("July 21, 1983 01:15:00");
+  // const d = new Date("July 21, 1983 01:15:00");
 
   const [text, onChangeText] = React.useState("");
 
@@ -98,15 +173,16 @@ function CreateEventScreen({ navigation }) {
     { label: "Private", value: 0 },
     { label: "Public", value: 1 },
   ];
-  const eventSet = () => {
+  const eventSet = async () => {
     console.log("****");
     if (text === "" || date === "") {
       alert("Please fill all the fields");
     } else {
       setIsLoad(true);
-      AsyncStorage.getItem("user").then((data) => {
+      await AsyncStorage.getItem("user").then((data) => {
         // console.log(JSON.parse(data).user.email);
         // console.log(JSON.parse(data).user.userName);
+
         fetch(apis + "addevent", {
           method: "POST",
           headers: {
@@ -116,6 +192,7 @@ function CreateEventScreen({ navigation }) {
             eventId: JSON.parse(data).user._id,
             name: text,
             date: date,
+            fname: JSON.parse(data).user.userName,
             isPrivate: isActive == 1 ? false : true,
           }),
         })
@@ -131,18 +208,35 @@ function CreateEventScreen({ navigation }) {
                   id: JSON.parse(data).user._id,
                   name: text,
                   date: date,
+                  fname: JSON.parse(data).user.userName,
                   isPrivate: isActive == 1 ? false : true,
                 }),
               })
                 .then((res) => res.json())
                 .then((data) => {
                   if (data.message == "Event Added Successfully") {
-                    console.log("Event Added Successfully");
+                    socket.emit(
+                      "eventName",
+                      JSON.stringify({
+                        eventId: JSON.parse(data).user._id,
+                        name: text,
+                        date: date,
+                        fname: JSON.parse(data).user.userName,
+                        isPrivate: isActive == 1 ? false : true,
+                      })
+                    );
+
+                    console.log("Event Added Successfully", data);
                   }
                 });
+              alert("Event Added Successfully");
+              navigation.navigate(
+                "SendEvents",
+                { data: JSON.parse(data).user.userName },
+                { disabledAnimation: true }
+              );
               setIsLoad(false);
               onChangeText("");
-              // alert("Event Added Successfully");
             } else {
               alert("Something went Wrong");
               setIsLoad(false);

@@ -10,8 +10,12 @@ const eventSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    fname: {
+      type: String,
+      required: true,
+    },
     date: {
-      type: Date,
+      type: String,
       required: true,
     },
     isPrivate: {

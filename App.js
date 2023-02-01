@@ -25,6 +25,7 @@ import Message from "./screens/all-chats/message";
 import ProfileBubble from "./components/profile-bubble";
 import SendEvents from "./screens/send-events";
 import EventDetails from "./screens/event-details";
+import UploadProfile from "./components/uploadProfile";
 
 const Stack = createNativeStackNavigator();
 export default function AppWrapper() {
@@ -127,6 +128,11 @@ function App() {
         <Stack.Screen
           name="EventDetails"
           component={EventDetails}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="UploadProfile"
+          component={UploadProfile}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

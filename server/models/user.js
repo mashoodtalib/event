@@ -19,10 +19,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  profile_pic: {
-    data: Buffer,
-    contentType: String,
-  },
+
   profile_pic_name: {
     type: String,
     default: "",

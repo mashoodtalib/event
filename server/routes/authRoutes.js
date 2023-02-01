@@ -129,7 +129,7 @@ router.post("/verify", (req, res) => {
 router.post("/signin", (req, res) => {
   const { userName, password, email } = req.body;
 
-  if (!userName || !password) {
+  if (!userName || !password || !email) {
     return res.status(422).json({ error: "Please add all the fields" });
   } else {
     User.findOne({ userName: userName })
@@ -262,6 +262,62 @@ router.post("/setusername", (req, res) => {
   });
 });
 
+router.post("/setbio", (req, res) => {
+  const { bio, email } = req.body;
+  if (!bio || !email) {
+    return res.status(422).json({ error: "Please add all the fields" });
+  }
+
+  User.find({ bio: bio }).then(async (savedUser) => {
+    if (savedUser.length > 0) {
+      return res.status(422).json({ error: "Bio already exists" });
+    } else {
+      User.findOne({ email: email }).then(async (savedUser) => {
+        if (savedUser) {
+          savedUser.bio = bio;
+          savedUser
+            .save()
+            .then((user) => {
+              res.json({ message: "Bio Updated Successfully" });
+            })
+            .catch((err) => {
+              return res.status(422).json({ error: "Server Error" });
+            });
+        } else {
+          return res.status(422).json({ error: "Invalid Credentials" });
+        }
+      });
+    }
+  });
+});
+router.post("/setlink", (req, res) => {
+  const { links, email } = req.body;
+  if (!links || !email) {
+    return res.status(422).json({ error: "Please add all the fields" });
+  }
+
+  User.find({ links: links }).then(async (savedUser) => {
+    if (savedUser.length > 0) {
+      return res.status(422).json({ error: "links already exists" });
+    } else {
+      User.findOne({ email: email }).then(async (savedUser) => {
+        if (savedUser) {
+          savedUser.links = links;
+          savedUser
+            .save()
+            .then((user) => {
+              res.json({ message: "links Updated Successfully" });
+            })
+            .catch((err) => {
+              return res.status(422).json({ error: "Server Error" });
+            });
+        } else {
+          return res.status(422).json({ error: "Invalid Credentials" });
+        }
+      });
+    }
+  });
+});
 router.post("/searchuser", (req, res) => {
   const { keyword } = req.body;
 

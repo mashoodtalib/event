@@ -12,13 +12,18 @@ import {
   Text,
   View,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from "react-native-responsive-screen";
 import Colors from "../constants/colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Bubble from "../components/Bubble";
 import { language } from "../constants/language";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import apis from "../constants/static-ip";
 
 const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
@@ -33,11 +38,50 @@ function HomePage({ navigation, route }) {
 
   useEffect(() => {
     getLang();
-    console.log("data", data);
+    // console.log("data", data);
   }, []);
 
   const getLang = async () => {
     setSelectLan(parseInt(await AsyncStorage.getItem("LANG")));
+  };
+  const [userdata, setUserdata] = React.useState(null);
+  const [save, setSave] = React.useState(null);
+
+  useEffect(() => {
+    loaddata();
+    // console.log(save.user.email);
+  }, []);
+  const loaddata = async () => {
+    //console.log(userdata.profile_pic_name);
+    AsyncStorage.getItem("user")
+      .then(async (value) => {
+        fetch(apis + "userdata", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(value).token,
+          },
+          body: JSON.stringify({ email: JSON.parse(value).user.email }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.message == "User Found") {
+              console.log("userdata ", userdata);
+              //  console.log("hhhhhhhhh", save);
+
+              setUserdata(data.user);
+            } else {
+              alert("Login Again");
+              navigation.push("Login");
+            }
+          })
+          .catch((err) => {
+            navigation.push("Login");
+          });
+      })
+      .catch((err) => {
+        navigation.push("Login");
+      });
   };
 
   return (
@@ -163,18 +207,20 @@ function HomePage({ navigation, route }) {
         onpress={() =>
           navigation.navigate(
             "allFriends",
-            { data: data },
 
             { disabledAnimation: true }
           )
         }
         bubbleStyle={{
-          top: hp('10%'),
-          position: "absolute", zIndex: 1, left: -10 }}
+          top: hp("10%"),
+          position: "absolute",
+          zIndex: 1,
+          left: -10,
+        }}
         styleBubble={{
           backgroundColor: Colors.dark,
-          height: hp('23%'),
-          width: wp('49%')
+          height: hp("25%"),
+          width: wp("50%"),
         }}
         iconName={"md-chatbubble-ellipses-outline"}
         textMessage={selectLan == 0 ? language[0].eng : language[0].arab}
@@ -186,12 +232,15 @@ function HomePage({ navigation, route }) {
         onpress={() => navigation.push("Settings", { disabledAnimation: true })}
         styleBubble={{
           backgroundColor: Colors.orange,
-          height: hp('15%'),
-          width: wp('32%')
+          height: hp("17%"),
+          width: wp("34%"),
         }}
         bubbleStyle={{
-          top: hp('8%')
-          , position: "absolute", zIndex: 1, right: -5 }}
+          top: hp("8%"),
+          position: "absolute",
+          zIndex: 1,
+          right: 15,
+        }}
         iconName={"md-settings-outline"}
         textMessage={selectLan == 0 ? language[1].eng : language[1].arab}
         iconSize={42}
@@ -203,13 +252,15 @@ function HomePage({ navigation, route }) {
           navigation.push("CreateEvent", { disabledAnimation: true })
         }
         bubbleStyle={{
-
-          top: hp('35%'),
-          position: "absolute", zIndex: 1, right: -20 }}
+          top: hp("35%"),
+          position: "absolute",
+          zIndex: 1,
+          right: -30,
+        }}
         styleBubble={{
           backgroundColor: Colors.brown,
-          height: hp('23%'),
-          width: wp('49%')
+          height: hp("30%"),
+          width: wp("60%"),
         }}
         iconName={"add-sharp"}
         textMessage={selectLan == 0 ? language[2].eng : language[2].arab}
@@ -219,15 +270,22 @@ function HomePage({ navigation, route }) {
       />
       <Bubble
         onpress={() =>
-          navigation.navigate("ProfileScreen", { disabledAnimation: true })
+          navigation.navigate(
+            "ProfileScreen",
+            { data: userdata.profile_pic_name },
+            { disabledAnimation: true }
+          )
         }
         bubbleStyle={{
-          top: hp('45%')
-          , position: "absolute", zIndex: 1, left: -30 }}
+          top: hp("45%"),
+          position: "absolute",
+          zIndex: 1,
+          left: -30,
+        }}
         styleBubble={{
           backgroundColor: Colors.pink,
-          height: hp('23%'),
-          width: wp('49%')
+          height: hp("27%"),
+          width: wp("54%"),
         }}
         iconName={"person-outline"}
         textMessage={selectLan == 0 ? language[3].eng : language[3].arab}
@@ -238,12 +296,15 @@ function HomePage({ navigation, route }) {
       <Bubble
         onpress={() => navigation.push("Events", { disabledAnimation: true })}
         bubbleStyle={{
-          top: hp('65%')
-          , position: "absolute", zIndex: 1, right: 2 }}
+          top: hp("70%"),
+          position: "absolute",
+          zIndex: 1,
+          right: 2,
+        }}
         styleBubble={{
           backgroundColor: Colors.dark,
-          height: hp('23%'),
-          width: wp('49%')
+          height: hp("23%"),
+          width: wp("46%"),
         }}
         iconName={"calendar-outline"}
         textMessage={selectLan == 0 ? language[4].eng : language[4].arab}
@@ -254,12 +315,15 @@ function HomePage({ navigation, route }) {
       <Bubble
         onpress={() => navigation.push("search", { disabledAnimation: true })}
         bubbleStyle={{
-          top: hp('75%')
-          , position: "absolute", zIndex: 1, left: 25 }}
+          top: hp("75%"),
+          position: "absolute",
+          zIndex: 1,
+          left: 25,
+        }}
         styleBubble={{
           backgroundColor: Colors.orange,
-          height: hp('15%'),
-          width: wp('32%')
+          height: hp("17%"),
+          width: wp("34%"),
         }}
         iconName={"search-outline"}
         textMessage={selectLan == 0 ? language[5].eng : language[5].arab}

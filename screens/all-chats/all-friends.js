@@ -58,7 +58,7 @@ export default function AllFriends({ navigation, route }) {
     }
   };
   useEffect(() => {
-    console.log(data);
+    // console.log(data);
     getLang();
 
     fetchArray();

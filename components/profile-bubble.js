@@ -3,105 +3,74 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 
 import {
   ActivityIndicator,
+  Alert,
   Animated,
   Dimensions,
   Image,
+  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-
 import Colors from "../constants/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { firebase } from "../firebase/config";
 import * as ImagePicker from "expo-image-picker";
 import apis from "../constants/static-ip";
+import ChangedBio from "./change-bio";
+import ChangedLinks from "./change-links";
 const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
 
 export default function ProfileBubble({ navigation, route }) {
   const [userdata, setUserdata] = React.useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible1, setModalVisible1] = useState(false);
   const [image, setImage] = useState(null);
-  const [save, setSave] = React.useState(null);
-
+  //const { data } = route.params;
   const [loading, setLoading] = useState(false);
+  // const { default: exampleImage } = import("../uploads/" + data);
+  //const exampleImageUri = Image.resolveAssetSource(exampleImage).uri;
   useEffect(() => {
-    oldData();
-    // console.log(save.user.email);
+    // oldData();
+    // oldImage();
+    // console.log(data);
   }, []);
-  const oldData = async () => {
-    await AsyncStorage.getItem("user")
-      .then((data) => {
-        setSave(data);
-      })
-      .catch((err) => alert(err));
-  };
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-    // console.log(result);
-
-    if (!result.canceled) {
-      setImage(result.assets);
-      console.log(result.assets);
-      handleUpload(result.assets);
-    } else {
-      console.log(error);
-    }
-  };
-
-  const handleUpload = async (uri) => {
-    setLoading(true);
-
-    await AsyncStorage.getItem("user")
-      .then(async (value) => {
-        const formData = new FormData();
-
-        formData.append("image", {
-          uri,
-        });
-        formData.append("profile_pic_name", "image/png");
-        formData.append("email", JSON.parse(value).user.email);
-        //console.log(uri);
-        console.log(JSON.parse(value).user.email);
-
-        const options = {
-          method: "POST",
-          body: formData,
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        };
-        await fetch(apis + "uploadimage", options)
-          .then((res) => res.json())
-          .then((data) => {
-            console.log(data);
-
-            if (data.message == "Image uploaded successfully") {
-              console.log("userdata ", userdata);
-
-              setUserdata(data.user);
-            } else {
-              alert("Something Wrong");
-            }
-          })
-          .catch((err) => {
-            alert("Something Went Wrong");
-            console.log(err);
-          });
-      })
-      .catch((err) => {
-        alert(err);
-
-        // navigation.push("ProfileScreen");
-      });
-  };
+  // const [data, setData] = useState(null);
+  // let base64String = "";
+  // const oldData = async () => {
+  //   await AsyncStorage.getItem("user")
+  //     .then((value) => {
+  //       fetch(apis + "getImage", {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({ userId: JSON.parse(value).user._id }),
+  //       })
+  //         .then((res) => setData(res.json()))
+  //         .catch((err) => console.log(err, "it has an error"));
+  //     })
+  //     .catch((err) => alert(err));
+  //   // base64String = Buffer(
+  //   //   String.fromCharCode(...new Uint8Array(data.image.data.data))
+  //   // );
+  //   console.log("aaaaaaaaaaaa", data);
+  //   console.log("bbb", data.image);
+  //   //   console.log("bb", base64String);
+  // };
+  // const oldImage = async () => {
+  //   AsyncStorage.getItem("img")
+  //     .then((data) => {
+  //       setImage(data);
+  //       console.log("img", image);
+  //     })
+  //     .catch((err) => alert(err));
+  // };
   const loaddata = async () => {
+    //console.log(userdata.profile_pic_name);
+
     AsyncStorage.getItem("user")
       .then(async (value) => {
         fetch(apis + "userdata", {
@@ -116,7 +85,7 @@ export default function ProfileBubble({ navigation, route }) {
           .then((data) => {
             if (data.message == "User Found") {
               console.log("userdata ", userdata);
-              console.log("hhhhhhhhh", save);
+              //   console.log("hhhhhhhhh", save);
 
               setUserdata(data.user);
             } else {
@@ -134,20 +103,29 @@ export default function ProfileBubble({ navigation, route }) {
   };
 
   console.log("userdata ", userdata);
+  //console.log("http://192.168.100.7:3000/" + userdata.profile_pic_name);
 
   const progress = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0)).current;
   useEffect(() => {
+    // console.log(
+    //   apis + `E:/React-Project/event/assets/` + userdata.profile_pic_name
+    // );
     Animated.timing(progress, { toValue: 1, useNativeDriver: true }).start();
     Animated.timing(scale, { toValue: 1.3, useNativeDriver: true }).start();
     loaddata();
+    // console.log(apis + `..uploads/${userdata.profile_pic_name}`);
   }, []);
-
-  if (!save) {
+  // useEffect(() => {
+  //   const imagePath = "E:\\React-Project\\event\\uploads\\" + data;
+  //   setImageUrl({ uri: imagePath });
+  //   console.log(imagePath);
+  // }, [route]);
+  if (!userdata) {
     return <ActivityIndicator />;
   }
 
-  return userdata && save ? (
+  return userdata ? (
     <View style={styles.root}>
       <Animated.View
         style={[
@@ -208,14 +186,24 @@ export default function ProfileBubble({ navigation, route }) {
         ]}
       >
         <View style={styles.userDetail}>
-          <Text style={[styles.fonts, { color: Colors.black }]}>
+          <Text style={[styles.fonts, { color: Colors.brown }]}>
             @{userdata.userName}
           </Text>
-          <Text style={[styles.fonts, { color: Colors.white }]}>
-            {userdata.bio}
+          <Text
+            onPress={() => {
+              setModalVisible(!modalVisible);
+            }}
+            style={[styles.fonts, { color: Colors.white }]}
+          >
+            {userdata.bio === "" ? "bio" : userdata.bio}
           </Text>
-          <Text style={[styles.fonts, { color: Colors.brown }]}>
-            {userdata.links}
+          <Text
+            onPress={() => {
+              setModalVisible1(!modalVisible);
+            }}
+            style={[styles.fonts, { color: Colors.brown }]}
+          >
+            {userdata.links === "" ? "links" : userdata.links}
           </Text>
         </View>
         {/* //  <TouchableOpacity onPress={handleUpload}> */}
@@ -228,18 +216,36 @@ export default function ProfileBubble({ navigation, route }) {
             { opacity: progress, transform: [{ scale }] },
           ]}
         >
-          {userdata.profile_pic === "" ? (
+          {userdata.profile_pic_name === "" ? (
             <Ionicons
-              onPress={pickImage}
-              name={"person-outline"}
+              name={"image-outline"}
               color={Colors.white}
-              size={44}
+              size={40}
+              onPress={() => navigation.navigate("UploadProfile")}
             />
           ) : (
-            <TouchableOpacity onPress={pickImage}>
-              <Image style={styles.profilepic} source={{ uri: image }} />
-            </TouchableOpacity>
+            // <TouchableOpacity
+            //   onPress={() => navigation.navigate("UploadProfile")}
+            // >
+            <Pressable
+              style={{ width: "100%", height: "100%", borderRadius: 360 }}
+              onPress={() => navigation.navigate("UploadProfile")}
+            >
+              <Image
+                style={{ width: "100%", height: "100%", borderRadius: 360 }}
+                source={{ uri: userdata.profile_pic_name }}
+              />
+            </Pressable>
+            /* //</TouchableOpacity> */
           )}
+          {/* <TouchableOpacity onPress={pickImage}>
+            {imageUrl && (
+              <Image
+                source={{ imageUrl }}
+                style={{ width: 100, height: 100 }}
+              />
+            )}
+          </TouchableOpacity> */}
         </Animated.View>
         {/* //  </TouchableOpacity> */}
 
@@ -295,6 +301,16 @@ export default function ProfileBubble({ navigation, route }) {
           <Ionicons name={"calendar-outline"} color={Colors.white} size={24} />
         </Animated.View>
       </Animated.View>
+      <ChangedBio
+        navigation={navigation}
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+      />
+      <ChangedLinks
+        navigation={navigation}
+        modalVisible1={modalVisible1}
+        setModalVisible1={setModalVisible1}
+      />
     </View>
   ) : (
     <ActivityIndicator />

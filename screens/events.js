@@ -6,7 +6,7 @@ import {
   Text,
   View,
   FlatList,
-  ActivityIndicator ,
+  ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
 import CustomBubble from "../components/Custom-Bubble";
@@ -14,7 +14,7 @@ import Colors from "../constants/colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import apis from "../constants/static-ip";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from "@react-navigation/native";
 
 const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
@@ -25,6 +25,32 @@ export default function Events() {
   const [text, onChangeText] = React.useState("");
   const [load, setIsLoad] = useState(false);
   const navigation = useNavigation();
+
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  //  const monthName = monthNames[date.getMonth()];
+
+  const days = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
 
   const loaddata = () => {
     // console.log(JSON.parse(data).user.email);
@@ -43,7 +69,7 @@ export default function Events() {
 
         setIsLoad(false);
       });
-      console.log(text);
+    console.log(text);
   };
   useEffect(() => {
     loaddata();
@@ -61,43 +87,56 @@ export default function Events() {
       <View style={styles.root}>
         <Text style={styles.fontDesign}>{"Events"}</Text>
         <View style={styles.container}>
-        <FlatList
-          data={text}
-          keyExtractor={(item , index) => item.id}
-          renderItem={({ item , index}) => (
-            <TouchableOpacity
-            onPress={() =>
-            navigation.navigate("EventDetails", { item: item })}>
-            <View style={styles.anRoot}>
-              <View style={index%2 == 0 ? styles.sm_bubble : [styles.sm_bubble, { backgroundColor: '#423242' }]}
-
+          <FlatList
+            style={{ margin: 20 }}
+            data={text}
+            keyExtractor={(_, item) => item._id}
+            renderItem={({ item, index }) => (
+              <TouchableOpacity
+                onPress={() => navigation.push("EventDetails", { item: item })}
               >
-                <View
-                  style={{
-                    flexDirection: "column",
-                    alignItems: "center",
-                    margin: 5,
-                  }}
-                >
-                  <Ionicons
-                    name="person-circle"
-                    size={28}
-                    color={Colors.white}
-                    />
-                  <Text style={styles.fontDesn}>{item.name}</Text>
-                  <Text style={styles.fontDesn}>{item.date.substring(0,10)}</Text>
+                <View style={styles.anRoot}>
+                  <View
+                    style={
+                      index % 2 == 0
+                        ? styles.sm_bubble
+                        : [styles.sm_bubble, { backgroundColor: "#423242" }]
+                    }
+                  >
+                    <View
+                      style={{
+                        flexDirection: "column",
+                        alignItems: "center",
+                        alignContent: "center",
+                      }}
+                    >
+                      <Ionicons
+                        name="person-circle"
+                        size={35}
+                        color={Colors.white}
+                        style={{
+                          marginHorizontal: 5,
+
+                          alignItems: "center",
+                          alignContent: "center",
+                          justifyContent: "center",
+                        }}
+                      />
+                      <Text style={styles.fontDesn}>{item.name}</Text>
+                      <Text style={styles.fontDesn}>{item.fname}</Text>
+                      <Text style={styles.fontDesn}>{item.date}</Text>
+                    </View>
+                  </View>
                 </View>
+              </TouchableOpacity>
+            )}
+            numColumns={numColumns}
+            ListFooterComponent={() => (
+              <View style={{ height: 100 }}>
+                {load && <ActivityIndicator size="large" color={Colors.dark} />}
               </View>
-            </View>
-            </TouchableOpacity>
-          )}
-          numColumns={numColumns}
-          ListFooterComponent={() => (
-            <View style={{ height: 100 }}>
-              {load && <ActivityIndicator size="large" color={Colors.dark} />}
-            </View>
-          )}
-        />
+            )}
+          />
         </View>
       </View>
     </CustomBubble>
@@ -107,18 +146,18 @@ export default function Events() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    overflow: 'scroll'
-},
+  },
   anRoot: {
     padding: 12,
   },
   sm_bubble: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 105,
+    height: 105,
+    borderRadius: 360,
     backgroundColor: Colors.pink,
     alignItems: "center",
-    justifyContent: "center",
+    padding: 4,
+    // justifyContent: "center",
     flex: 1,
   },
   // width: (width - 60) / numColumns,
@@ -137,13 +176,16 @@ const styles = StyleSheet.create({
 
   fontDesign: {
     fontFamily: "GothicA1-Regular",
+    alignItems: "center",
 
     color: Colors.white,
     fontSize: 24,
   },
   fontDesn: {
     fontFamily: "GothicA1-Regular",
-
+    textAlign: "center",
+    padding: 0.2,
+    marginHorizontal: 5,
     color: Colors.white,
     fontSize: 9,
   },
