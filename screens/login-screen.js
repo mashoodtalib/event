@@ -15,6 +15,7 @@ import PrimaryButton from "../components/Primary-Button";
 import LinearGradientComponent from "../components/Linear-Gradient-component";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import apis from "../constants/static-ip";
+import { Image } from "react-native";
 const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
 export default function LoginScreen({ navigation }) {
@@ -26,7 +27,7 @@ export default function LoginScreen({ navigation }) {
   const [password, setPassword] = React.useState("");
   const [errormsg, setErrormsg] = React.useState(null);
   const Sendtobackend = () => {
-    if (userName == "" || password == "" || email == "") {
+    if (userName == "" || password == "") {
       alert("Please enter userName and password");
     } else {
       setLoading(true);
@@ -38,7 +39,6 @@ export default function LoginScreen({ navigation }) {
         body: JSON.stringify({
           userName,
           password,
-          email,
         }),
       })
         .then((res) => res.json())
@@ -66,28 +66,30 @@ export default function LoginScreen({ navigation }) {
   return (
     <LinearGradientComponent>
       <View style={styles.rootScreen}>
+        <Image
+          style={{ height: "10%", width: "60%" }}
+          source={require("../assets/Ondosecondary.png")}
+        />
         <View style={styles.textInputField}>
           <Text style={styles.text}>Play</Text>
           <Text style={styles.textLife}>Your Life</Text>
         </View>
         {errormsg ? <Text style={styles.errormessage}>{errormsg}</Text> : null}
         <TextInput
+          onSubmitEditing={() => {
+            Sendtobackend();
+          }}
           style={styles.input}
           onPressIn={() => setErrormsg(null)}
           onChangeText={(text) => setuserName(text)}
           placeholder="userName"
           autoCorrect={false}
         />
-        <TextInput
-          style={styles.input}
-          onPressIn={() => setErrormsg(null)}
-          onChangeText={(text) => setMail(text)}
-          placeholder="Email"
-          autoCorrect={false}
-          keyboardType={"email-address"}
-        />
 
         <TextInput
+          onSubmitEditing={() => {
+            Sendtobackend();
+          }}
           style={styles.input}
           onPressIn={() => setErrormsg(null)}
           onChangeText={(text) => setPassword(text)}
@@ -138,6 +140,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   textInputField: {
+    marginTop: 10,
+
     alignItems: "center",
     justifyContent: "center",
   },

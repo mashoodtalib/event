@@ -15,11 +15,11 @@ const UserCard = ({ user, navigation }) => {
       }}
     >
       <View style={styles.ChatCard}>
-        {/* {user.profile_pic ? (
-          <Image source={{ uri: user.profile_pic }} style={styles.image} />
+        {user.profile_pic_name === "" ? (
+          <Ionicons name={"person-outline"} color={Colors.white} size={40} />
         ) : (
-          <Ionicons name={"person-outline"} color={Colors.white} size={44} />
-        )} */}
+          <Image source={{ uri: user.profile_pic_name }} style={styles.image} />
+        )}
 
         <View style={styles.c1}>
           <Text style={styles.username}>{user.username}</Text>
@@ -42,9 +42,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   image: {
-    width: 40,
-    height: 40,
-    borderRadius: 50,
+    width: "20%",
+    height: 50,
+    borderRadius: 360,
   },
   username: {
     color: "white",

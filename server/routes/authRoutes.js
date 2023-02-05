@@ -6,6 +6,7 @@ const User = mongoose.model("User");
 const jwt = require("jsonwebtoken");
 //
 require("dotenv").config();
+const validator = require("validator");
 
 // //
 const bcrypt = require("bcrypt");
@@ -46,26 +47,37 @@ router.post("/signup", async (req, res) => {
   console.log("sent by client - ", req.body);
   const { userName, name, email, password } = req.body;
 
-  const user = new User({
-    userName,
-    name,
-    email,
-    password,
-  });
-
-  try {
-    await user.save();
-    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
-    // const id = _id;
-    // // const { _id, userName, email } = savedUser;
-
+  if (!validator.isEmail(email)) {
     res.send({
-      message: "User Registered Successfully",
-      token,
-      user: { userName, name, email, password },
+      error: true,
+      message: "Invalid email address",
     });
-  } catch (err) {
-    console.log(err);
+    User.findOne({ email: email, userName: userName }).then((userdata) => {
+      res.status(200).send({
+        message: "Email or userName Already exist",
+      });
+    });
+  } else {
+    const user = new User({
+      userName,
+      name,
+      email,
+      password,
+    });
+    try {
+      await user.save();
+      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+      // const id = _id;
+      // // const { _id, userName, email } = savedUser;
+
+      res.send({
+        message: "User Registered Successfully",
+        token,
+        user: { userName, name, email, password },
+      });
+    } catch (err) {
+      console.log(err);
+    }
   }
 });
 router.post("/userdata", (req, res) => {
@@ -127,9 +139,9 @@ router.post("/verify", (req, res) => {
 });
 
 router.post("/signin", (req, res) => {
-  const { userName, password, email } = req.body;
+  const { userName, password } = req.body;
 
-  if (!userName || !password || !email) {
+  if (!userName || !password) {
     return res.status(422).json({ error: "Please add all the fields" });
   } else {
     User.findOne({ userName: userName })
@@ -144,26 +156,27 @@ router.post("/signin", (req, res) => {
                 { _id: savedUser._id },
                 process.env.JWT_SECRET
               );
-              // let data = {
-              //   _id: saveduser._id,
-              //   userName: saveduser.userName,
-              //   name: saveduser.name,
-              //   email: saveduser.email,
-              //   profile_pic: saveduser.profile_pic,
-              //   profile_pic_name: saveduser.profile_pic_name,
-              //   bio: saveduser.bio,
-              //   links: saveduser.links,
-              //   followers: saveduser.followers,
-              //   following: saveduser.following,
-              //   allmessages: saveduser.allmessages,
-              //   allevents: saveduser.allevents,
-              // };
-              const { _id, userName, password, email } = savedUser;
+              let data = {
+                _id: savedUser._id,
+                userName: savedUser.userName,
+                name: savedUser.name,
+                email: savedUser.email,
+                profile_pic_name: savedUser.profile_pic_name,
+                bio: savedUser.bio,
+                links: savedUser.links,
+                followers: savedUser.followers,
+                following: savedUser.following,
+                allmessages: savedUser.allmessages,
+                allevents: savedUser.allevents,
+                accevents: savedUser.accevents,
+                acceventsfrom: savedUser.acceventsfrom,
+              };
+              //   const { _id, userName, password, email } = savedUser;
 
               res.json({
                 message: "Successfully Signed In",
                 token,
-                user: { _id, userName, password, email },
+                user: data,
               });
             } else {
               return res.status(422).json({ error: "Invalid Credentials" });
@@ -334,7 +347,7 @@ router.post("/searchuser", (req, res) => {
           _id: item._id,
           username: item.userName,
           email: item.email,
-          profile_pic: item.profile_pic,
+          profile_pic_name: item.profile_pic_name,
         });
       });
 
@@ -365,7 +378,6 @@ router.post("/otheruserdata", (req, res) => {
       userName: saveduser.userName,
       name: saveduser.name,
       email: saveduser.email,
-      profile_pic: saveduser.profile_pic,
       profile_pic_name: saveduser.profile_pic_name,
       bio: saveduser.bio,
       links: saveduser.links,
@@ -373,6 +385,8 @@ router.post("/otheruserdata", (req, res) => {
       following: saveduser.following,
       allmessages: saveduser.allmessages,
       allevents: saveduser.allevents,
+      accevents: saveduser.accevents,
+      acceventsfrom: saveduser.acceventsfrom,
     };
 
     // console.log(data);
@@ -413,7 +427,6 @@ router.post("/getuserbyid", (req, res) => {
         userName: saveduser.userName,
         name: saveduser.name,
         email: saveduser.email,
-        profile_pic: saveduser.profile_pic,
         profile_pic_name: saveduser.profile_pic_name,
         bio: saveduser.bio,
         links: saveduser.links,
@@ -421,6 +434,8 @@ router.post("/getuserbyid", (req, res) => {
         following: saveduser.following,
         allmessages: saveduser.allmessages,
         allevents: saveduser.allevents,
+        accevents: saveduser.accevents,
+        acceventsfrom: saveduser.acceventsfrom,
       };
 
       // console.log(data);

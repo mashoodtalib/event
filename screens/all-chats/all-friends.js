@@ -41,12 +41,12 @@ export default function AllFriends({ navigation, route }) {
     try {
       await AsyncStorage.getItem("user")
         .then(async (value) => {
-          console.log(JSON.parse(value).user.email);
+          //    console.log(JSON.parse(value).user.email);
           fetch(apis + `${JSON.parse(value).user.userName}`)
             .then((res) => res.json())
             .then((dat) => {
               setArray(dat);
-              console.log("data", dat);
+              // console.log("data", dat);
             });
         })
         .catch((err) => {
@@ -54,7 +54,7 @@ export default function AllFriends({ navigation, route }) {
         });
     } catch (err) {
       setError(err);
-      console.log(err);
+      //  console.log(err);
     }
   };
   useEffect(() => {
@@ -65,8 +65,16 @@ export default function AllFriends({ navigation, route }) {
   }, []);
   useEffect(() => {
     if (array) {
-      array.following.forEach((item) => {
-        console.log(item);
+      let allData = array.following.concat(array.followers);
+
+      let uniqueData = allData.filter(
+        (value, index, self) => self.indexOf(value) === index
+      );
+
+      console.log(uniqueData);
+
+      uniqueData.forEach((item) => {
+        //  console.log(item);
         const fetchData2 = async () => {
           try {
             const res = await fetch(apis + `otheruserdata`, {
@@ -79,11 +87,11 @@ export default function AllFriends({ navigation, route }) {
               },
             });
             const data = await res.json();
-            console.log(data);
+            //  console.log(data);
 
             setUserdataagain((prevData2) => [...prevData2, data]);
           } catch (err) {
-            console.error(err);
+            //  console.error(err);
             setError(err);
           }
         };
@@ -189,20 +197,37 @@ export default function AllFriends({ navigation, route }) {
             }}
             source={require("../../assets/chat-bubll.png")}
           />
-          <Ionicons
-            style={{
-              marginTop: 10,
-              textAlign: "center",
+          {item.user.profile_pic_name === "" ? (
+            <Ionicons
+              style={{
+                marginTop: 10,
+                textAlign: "center",
 
-              left: 14,
-              overflow: "hidden",
-              right: 14,
-              position: "absolute",
-            }}
-            name={"person-circle-outline"}
-            color={Colors.white}
-            size={28}
-          />
+                left: 14,
+                overflow: "hidden",
+                right: 14,
+                position: "absolute",
+              }}
+              name={"person-circle-outline"}
+              color={Colors.white}
+              size={28}
+            />
+          ) : (
+            <Image
+              style={{
+                marginTop: 10,
+                overflow: "hidden",
+
+                left: 30,
+                right: 30,
+                position: "absolute",
+                width: "30%",
+                height: "30%",
+                borderRadius: 360,
+              }}
+              source={{ uri: item.user.profile_pic_name }}
+            />
+          )}
           <Text
             style={[
               {
@@ -251,7 +276,7 @@ export default function AllFriends({ navigation, route }) {
           style={styles.userlists}
           data={userdataagain}
           numColumns={2}
-          keyExtractor={(_, item) => item.user}
+          keyExtractor={(_, item) => item}
           renderItem={({ item, index }) => {
             return <Item item={item} index={index} />;
           }}

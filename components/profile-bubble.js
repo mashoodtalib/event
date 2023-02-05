@@ -15,15 +15,13 @@ import {
 } from "react-native";
 import Colors from "../constants/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { firebase } from "../firebase/config";
-import * as ImagePicker from "expo-image-picker";
 import apis from "../constants/static-ip";
 import ChangedBio from "./change-bio";
 import ChangedLinks from "./change-links";
 const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
 
-export default function ProfileBubble({ navigation, route }) {
+export default function ProfileBubble({ navigation }) {
   const [userdata, setUserdata] = React.useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible1, setModalVisible1] = useState(false);
@@ -71,9 +69,9 @@ export default function ProfileBubble({ navigation, route }) {
   const loaddata = async () => {
     //console.log(userdata.profile_pic_name);
 
-    AsyncStorage.getItem("user")
+    await AsyncStorage.getItem("user")
       .then(async (value) => {
-        fetch(apis + "userdata", {
+        await fetch(apis + "userdata", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -88,33 +86,48 @@ export default function ProfileBubble({ navigation, route }) {
               //   console.log("hhhhhhhhh", save);
 
               setUserdata(data.user);
+              // console.log(apis + `fetchImage/${data.user.profile_pic_name}`);
+              // const response = fetch(
+              //   apis + `fetchImage/${data.user.profile_pic_name}`,
+              //   {
+              //     method: "GET",
+              //     headers: {
+              //       "Content-Type": "application/json",
+              //     },
+              //   }
+              // );
+              // const data = response.json();
+              // console.log(data);
+              // setImage(data);
+              // AsyncStorage.getItem("img").then((value) => {
+              //   setImage(value);
+              //   console.log(value);
+              // });
             } else {
               alert("Login Again");
               navigation.push("Login");
             }
           })
           .catch((err) => {
-            navigation.push("Login");
+            // navigation.push("Login");
+            console.log(err);
           });
       })
       .catch((err) => {
-        navigation.push("Login");
+        console.log(err);
+
+        //    navigation.push("Login");
       });
   };
 
   console.log("userdata ", userdata);
-  //console.log("http://192.168.100.7:3000/" + userdata.profile_pic_name);
 
   const progress = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0)).current;
   useEffect(() => {
-    // console.log(
-    //   apis + `E:/React-Project/event/assets/` + userdata.profile_pic_name
-    // );
     Animated.timing(progress, { toValue: 1, useNativeDriver: true }).start();
     Animated.timing(scale, { toValue: 1.3, useNativeDriver: true }).start();
     loaddata();
-    // console.log(apis + `..uploads/${userdata.profile_pic_name}`);
   }, []);
   // useEffect(() => {
   //   const imagePath = "E:\\React-Project\\event\\uploads\\" + data;

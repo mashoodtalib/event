@@ -18,6 +18,15 @@ const messageSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    type: {
+      type: String,
+    },
+    mimeType: {
+      type: String,
+    },
+    fileName: {
+      type: String,
+    },
   },
   {
     timestamps: true,

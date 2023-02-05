@@ -34,39 +34,31 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.post("/uploadimage", upload.single("image"), async (req, res) => {
-  const { email } = req.body;
-  console.log(req.file.filename);
+  const { email, name } = req.body;
+  console.log(req.body.name);
+  const uploadsPath = path.resolve("uploads");
+
   try {
     // const filepath = path.join(__dirname, "uploads", req.file.originalname);
     // console.log(filepath);
     if (!req.file) {
       res.send({ code: 500, msg: "err" });
     } else {
-      fs.readFile(
-        "E:/React-Project/event/server/uploads/" + req.file.filename,
-        "base64",
-        function (err, data) {
-          if (err) throw err;
-          res.send(data);
+      User.findOne({ email: email }).then(async (savedUser) => {
+        if (savedUser) {
+          savedUser.profile_pic_name = name;
+          savedUser
+            .save()
+            .then((user) => {
+              res.json({ message: "Profile Pic Changed Successfully" });
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        } else {
+          return res.status(422).json({ error: "Invalid Credentials" });
         }
-      );
-      User.findOneAndUpdate(
-        email,
-        {
-          profile_pic_name:
-            "E:/React-Project/event/server/uploads/" + req.file.filename,
-        },
-        (err, savedUser) => {
-          if (err) {
-            console.log(err);
-          } else {
-            console.log(savedUser);
-            savedUser.save();
-
-            res.send({ code: 200, msg: "Success" });
-          }
-        }
-      );
+      });
       // User.findByIdAndUpdate({ _id: userId }).then((savedUser) => {
       //   console.log(savedUser);
       //   savedUser.profile_pic_name = req.file.originalname;
@@ -77,6 +69,15 @@ router.post("/uploadimage", upload.single("image"), async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err });
   }
+});
+router.get("/fetchImage/:file(*)", (req, res) => {
+  let file = req.params.file;
+  const uploadsPath = path.resolve("uploads");
+  console.log(file);
+  let fileLocation = path.join(uploadsPath, file);
+  console.log(fileLocation);
+  //res.send({image: fileLocation});
+  res.sendFile(`${fileLocation}`);
 });
 router.post("/id", (req, res) => {
   console.log(req.params._id);

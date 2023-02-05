@@ -11,6 +11,8 @@ import {
   Image,
 } from "react-native";
 import React, { useEffect, useState } from "react";
+import { Buffer } from "buffer";
+
 import Colors from "../constants/colors";
 import CustomBubble from "../components/Custom-Bubble";
 import * as ImagePicker from "expo-image-picker";
@@ -38,10 +40,11 @@ const UploadProfile = ({ navigation }) => {
       });
 
       if (!response.canceled) {
-        setProfileImage(response.assets[0]);
+        // setProfileImage(response.assets[0]);
         console.log(response.assets[0].uri);
         // console.log(response.assets[0].uri);
-        // console.log(response.assets[0].fileName);
+        setProfileImage(response.assets[0].uri);
+        //   AsyncStorage.setItem("img", response.assets[0].uri);
       }
     }
   };
@@ -51,13 +54,13 @@ const UploadProfile = ({ navigation }) => {
       // formData.append("image", profileImage);
       //  AsyncStorage.setItem("img", profileImage)
       formData.append("image", {
-        uri: profileImage.uri,
+        uri: profileImage,
         type: "image/png",
-        name: "image.png",
+        name: Date.now().toFixed(10) + "image.png",
       });
       // formData.append("userId", JSON.parse(value).user._id);
       formData.append("email", JSON.parse(value).user.email);
-
+      formData.append("name", profileImage);
       try {
         const response = await fetch(apis + "uploadimage", {
           body: formData,
@@ -105,9 +108,9 @@ const UploadProfile = ({ navigation }) => {
             onPress={openImageLibrary}
             style={styles.uploadBtnContainer}
           >
-            {profileImage.uri ? (
+            {profileImage ? (
               <Image
-                source={{ uri: profileImage.uri }}
+                source={{ uri: profileImage }}
                 style={{ width: "100%", height: "100%" }}
               />
             ) : (
@@ -115,7 +118,7 @@ const UploadProfile = ({ navigation }) => {
             )}
           </TouchableOpacity>
           <Text style={styles.skip}>Skip</Text>
-          {profileImage.uri ? (
+          {profileImage ? (
             <Text
               onPress={uploadProfileImage}
               style={[

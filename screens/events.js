@@ -15,6 +15,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import apis from "../constants/static-ip";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+import { Image } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
@@ -65,11 +66,11 @@ export default function Events() {
       .then((res) => res.json())
       .then((dat) => {
         onChangeText(dat);
-        console.log(dat);
+        //  console.log(dat);
 
         setIsLoad(false);
       });
-    console.log(text);
+    // console.log(text);
   };
   useEffect(() => {
     loaddata();
@@ -90,7 +91,7 @@ export default function Events() {
           <FlatList
             style={{ margin: 20 }}
             data={text}
-            keyExtractor={(_, item) => item._id}
+            keyExtractor={(_, item) => item}
             renderItem={({ item, index }) => (
               <TouchableOpacity
                 onPress={() => navigation.push("EventDetails", { item: item })}
@@ -110,18 +111,30 @@ export default function Events() {
                         alignContent: "center",
                       }}
                     >
-                      <Ionicons
-                        name="person-circle"
-                        size={35}
-                        color={Colors.white}
-                        style={{
-                          marginHorizontal: 5,
+                      {item.pic === "" ? (
+                        <Ionicons
+                          name="person-circle"
+                          size={35}
+                          color={Colors.white}
+                          style={{
+                            marginHorizontal: 5,
 
-                          alignItems: "center",
-                          alignContent: "center",
-                          justifyContent: "center",
-                        }}
-                      />
+                            alignItems: "center",
+                            alignContent: "center",
+                            justifyContent: "center",
+                          }}
+                        />
+                      ) : (
+                        <Image
+                          style={{
+                            height: 25,
+                            width: 25,
+                            borderRadius: 360,
+                            marginBottom: 4,
+                          }}
+                          source={{ uri: item.pic }}
+                        />
+                      )}
                       <Text style={styles.fontDesn}>{item.name}</Text>
                       <Text style={styles.fontDesn}>{item.fname}</Text>
                       <Text style={styles.fontDesn}>{item.date}</Text>

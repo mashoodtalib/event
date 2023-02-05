@@ -15,6 +15,8 @@ import {
 import Colors from "../../constants/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import apis from "../../constants/static-ip";
+import ChangedBio from "../../components/change-bio";
+import ChangedLinks from "../../components/change-links";
 
 const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
@@ -42,7 +44,8 @@ const size = Math.min(width, height) - 1;
 export default function OtherUser({ navigation, route }) {
   const [userdata, setUserdata] = React.useState(null);
   const [issameuser, setIssameuser] = React.useState(false);
-
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible1, setModalVisible1] = useState(false);
   const ismyprofile = (otheruser) => {
     AsyncStorage.getItem("user").then((loggeduser) => {
       const loggeduserobj = JSON.parse(loggeduser);
@@ -227,14 +230,24 @@ export default function OtherUser({ navigation, route }) {
         ]}
       >
         <View style={styles.userDetail}>
-          <Text style={[styles.fonts, { color: Colors.black }]}>
+          <Text style={[styles.fonts, { color: Colors.brown }]}>
             @{userdata.userName}
           </Text>
-          <Text style={[styles.fonts, { color: Colors.white }]}>
-            {userdata.bio}
+          <Text
+            onPress={() => {
+              setModalVisible(!modalVisible);
+            }}
+            style={[styles.fonts, { color: Colors.white }]}
+          >
+            {userdata.bio === "" ? "bio" : userdata.bio}
           </Text>
-          <Text style={[styles.fonts, { color: Colors.brown }]}>
-            {userdata.links}
+          <Text
+            onPress={() => {
+              setModalVisible1(!modalVisible);
+            }}
+            style={[styles.fonts, { color: Colors.brown }]}
+          >
+            {userdata.links === "" ? "links" : userdata.links}
           </Text>
         </View>
         {/* //  <TouchableOpacity onPress={handleUpload}> */}
@@ -247,14 +260,19 @@ export default function OtherUser({ navigation, route }) {
             { opacity: progress, transform: [{ scale }] },
           ]}
         >
-          {/* {userdata.profile_pic === "" ? (
-            <Ionicons name={"person-outline"} color={Colors.white} size={44} />
+          {userdata.profile_pic_name === "" ? (
+            <Ionicons name={"image-outline"} color={Colors.white} size={40} />
           ) : (
+            // <TouchableOpacity
+            //   onPress={() => navigation.navigate("UploadProfile")}
+            // >
+
             <Image
-              style={styles.profilepic}
-              source={{ uri: userdata.profile_pic }}
+              style={{ width: "100%", height: "100%", borderRadius: 360 }}
+              source={{ uri: userdata.profile_pic_name }}
             />
-          )} */}
+            /* //</TouchableOpacity> */
+          )}
         </Animated.View>
         {/* //  </TouchableOpacity> */}
 
@@ -288,6 +306,16 @@ export default function OtherUser({ navigation, route }) {
           )}
         </Animated.View>
       </Animated.View>
+      <ChangedBio
+        navigation={navigation}
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+      />
+      <ChangedLinks
+        navigation={navigation}
+        modalVisible1={modalVisible1}
+        setModalVisible1={setModalVisible1}
+      />
     </View>
   ) : (
     <ActivityIndicator />

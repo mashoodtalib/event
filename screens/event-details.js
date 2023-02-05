@@ -36,11 +36,45 @@ function EventDetails({ navigation, route }) {
   const { item } = route.params;
   const [load, setIsLoad] = useState(false);
   const [text, onChangeText] = React.useState("");
+  const [set, setText] = React.useState("");
 
   useEffect(() => {
     console.log(item);
     loaddata();
+    loadUserData();
   }, []);
+
+  const loadUserData = async () => {
+    await AsyncStorage.getItem("user").then((data) => {
+      fetch(apis + "otheruserdata", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: JSON.parse(data).user.email }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.message == "User Found") {
+            setText(data.user);
+
+            CheckFollow(data.user);
+          } else {
+            alert("User Not Found");
+            navigation.navigate("search");
+            // navigation.navigate('Login')
+          }
+        })
+        .catch((err) => {
+          // console.log(err)
+          alert("Something Went Wrong");
+          navigation.navigate("search");
+        });
+
+      console.log(data.user);
+    });
+  };
+
   const loaddata = () => {
     // console.log(JSON.parse(data).user.email);
     // console.log(JSON.parse(data).user.userName);
@@ -58,12 +92,96 @@ function EventDetails({ navigation, route }) {
       .then((dat) => {
         onChangeText(dat);
         console.log(dat);
+        CheckFollow(dat.user);
 
         setIsLoad(false);
       });
     console.log(text);
   };
-  return text ? (
+  const FollowThisUser = async () => {
+    console.log("accetpEvent");
+    const loggeduser = await AsyncStorage.getItem("user");
+    const loggeduserobj = JSON.parse(loggeduser);
+    console.log(loggeduser);
+    console.log(loggeduserobj);
+    fetch(apis + "accetpEvent", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        acceptfrom: loggeduserobj.user.email,
+        acceptto: item.email,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.message == "Event Accepted") {
+          console.log(data);
+          alert("Event Accepted");
+          loaddata();
+          setIsfollowing(true);
+        } else {
+          alert("Something Went Wrong");
+          console.log(data);
+        }
+      });
+  };
+
+  const [isfollowing, setIsfollowing] = React.useState(false);
+  const CheckFollow = async () => {
+    AsyncStorage.getItem("user").then((loggeduser) => {
+      const loggeduserobj = JSON.parse(loggeduser);
+      fetch(apis + "checkevent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          acceptfrom: loggeduserobj.user.email,
+          acceptto: item.email,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.message == "Event in following list") {
+            setIsfollowing(true);
+          } else if (data.message == "Event not in following list") {
+            setIsfollowing(false);
+          } else {
+            // loaddata()
+            alert("Something Went Wrong");
+          }
+        });
+    });
+  };
+
+  const UnfollowThisUser = async () => {
+    console.log("UnfollowThisUser");
+    const loggeduser = await AsyncStorage.getItem("user");
+    const loggeduserobj = JSON.parse(loggeduser);
+    fetch(apis + "unfollowevent", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        acceptfrom: loggeduserobj.user.email,
+        acceptto: item.email,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.message == "Event unaccepted") {
+          alert("Event unaccepted");
+          loaddata();
+          setIsfollowing(false);
+        } else {
+          alert("Something Went Wrong");
+        }
+      });
+  };
+  return set && text ? (
     <CustomBubble
       bubbleColor={Colors.dark}
       crossColor={Colors.brown}
@@ -79,7 +197,19 @@ function EventDetails({ navigation, route }) {
         }}
       >
         <View style={{ flex: 1, alignItems: "flex-end" }}>
-          <Ionicons name="person-circle" size={60} color={Colors.white} />
+          {item.pic === "" ? (
+            <Ionicons name="person-circle" size={60} color={Colors.white} />
+          ) : (
+            <Image
+              style={{
+                height: 50,
+                width: 50,
+                marginRight: 8,
+                borderRadius: 360,
+              }}
+              source={{ uri: item.pic }}
+            />
+          )}
         </View>
         <View
           style={{
@@ -120,37 +250,51 @@ function EventDetails({ navigation, route }) {
             justifyContent: "center",
           }}
         >
-          <Pressable>
-            <View
-              style={{
-                alignItems: "center",
-                backgroundColor: Colors.brown,
-                height: 30,
-                width: 60,
-                borderRadius: 20,
-              }}
-            >
-              <Ionicons name={"ios-checkmark"} size={22} color={Colors.white} />
-            </View>
-          </Pressable>
+          {set.email === item.email ? (
+            <View></View>
+          ) : (
+            <Pressable>
+              <View
+                style={{
+                  alignItems: "center",
+                  backgroundColor: Colors.brown,
+                  height: 30,
+                  width: 60,
+                  borderRadius: 20,
+                }}
+              >
+                <Ionicons
+                  name={"ios-checkmark"}
+                  size={22}
+                  color={Colors.white}
+                  onPress={() => FollowThisUser()}
+                />
+              </View>
+            </Pressable>
+          )}
           <View style={{ width: 10 }}></View>
-          <Pressable>
-            <View
-              style={{
-                alignItems: "center",
-                backgroundColor: Colors.pink,
-                height: 30,
-                width: 60,
-                borderRadius: 20,
-              }}
-            >
-              <Ionicons
-                name={"ios-close-outline"}
-                size={22}
-                color={Colors.white}
-              />
-            </View>
-          </Pressable>
+          {set.email === item.email ? (
+            <View></View>
+          ) : (
+            <Pressable>
+              <View
+                style={{
+                  alignItems: "center",
+                  backgroundColor: Colors.pink,
+                  height: 30,
+                  width: 60,
+                  borderRadius: 20,
+                }}
+              >
+                <Ionicons
+                  name={"ios-close-outline"}
+                  size={22}
+                  color={Colors.white}
+                  onPress={() => UnfollowThisUser()}
+                />
+              </View>
+            </Pressable>
+          )}
         </View>
       </View>
     </CustomBubble>

@@ -26,6 +26,7 @@ import ProfileBubble from "./components/profile-bubble";
 import SendEvents from "./screens/send-events";
 import EventDetails from "./screens/event-details";
 import UploadProfile from "./components/uploadProfile";
+import SplashScreen from "./screens/splashScreen";
 
 const Stack = createNativeStackNavigator();
 export default function AppWrapper() {
@@ -54,7 +55,7 @@ function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName="SplashScreen">
         <Stack.Screen
           name="Account"
           component={YourAccount}
@@ -73,6 +74,11 @@ function App() {
         <Stack.Screen
           name="HomePage"
           component={HomePage}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="SplashScreen"
+          component={SplashScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen

@@ -326,7 +326,12 @@ export default function SendEvents({ navigation, route }) {
           >
             {item.user.profile_pic_name != "" ? (
               <Image
-                style={{ height: "100%", width: "100%" }}
+                style={{
+                  margin: 10,
+                  height: 50,
+                  width: 50,
+                  borderRadius: 360,
+                }}
                 source={{ uri: item.user.profile_pic_name }}
               />
             ) : (
@@ -338,6 +343,7 @@ export default function SendEvents({ navigation, route }) {
             )}
             <View
               style={{
+                margin: 10,
                 flexDirection: "column",
                 alignItems: "flex-start",
                 marginLeft: 4,
@@ -346,6 +352,7 @@ export default function SendEvents({ navigation, route }) {
               <Text
                 style={{
                   fontSize: 20,
+
                   color: Colors.pink,
                   fontFamily: "GothicA1-Regular",
                 }}
@@ -355,6 +362,7 @@ export default function SendEvents({ navigation, route }) {
               <Text
                 style={{
                   fontSize: 20,
+
                   color: Colors.pink,
                   fontFamily: "GothicA1-Regular",
                 }}
@@ -392,7 +400,7 @@ export default function SendEvents({ navigation, route }) {
         <FlatList
           style={styles.userlists}
           data={userdataagain}
-          keyExtractor={(_, item) => item.user}
+          keyExtractor={(_, item) => item}
           renderItem={({ item, index }) => {
             return <Item item={item} index={index} />;
           }}

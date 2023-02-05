@@ -14,6 +14,11 @@ const eventSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    email: {
+      type: String,
+      required: true,
+    },
+    pic: { type: String },
     date: {
       type: String,
       required: true,

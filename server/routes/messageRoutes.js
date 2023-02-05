@@ -7,19 +7,49 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
+const path = require("path");
+const multer = require("multer");
 
-router.post("/savemessagetodb", async (req, res) => {
-  const { senderid, message, roomid, recieverid } = req.body;
+const fs = require("fs");
+fs.access("uploads", fs.constants.R_OK, (err) => {
+  if (err) {
+    fs.mkdirSync("uploads");
+    const uploadsPath = path.resolve("uploads/messages");
+    console.log(uploadsPath);
+    console.log("file is not readable");
+  } else {
+    console.log("file is readable");
+    const uploadsPath = path.resolve("uploads/messages");
+    console.log(uploadsPath);
+  }
+});
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/messages");
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
+});
+const upload = multer({ storage: storage });
+router.post("/savemessagetodb", upload.single("image"), async (req, res) => {
+  const { senderid, message, roomid, recieverid, type, mimeType, fileName } =
+    req.body;
   console.log("MESSAGE RECEIVED - ", req.body);
+
   try {
     const newMessage = new Message({
       senderid,
       message,
       roomid,
       recieverid,
+      type,
+      mimeType,
+      fileName,
     });
     await newMessage.save();
     res.send({ message: "Message saved successfully" });
+    console.log(res.json());
   } catch (err) {
     res.status(422).send(err.message);
   }
@@ -27,7 +57,7 @@ router.post("/savemessagetodb", async (req, res) => {
 
 router.post("/getmessages", async (req, res) => {
   const { roomid } = req.body;
-  console.log("ROOM ID RECEIVED - ", roomid);
+  //console.log("ROOM ID RECEIVED - ", roomid);
 
   Message.find({ roomid: roomid })
     .then((messages) => {
@@ -38,17 +68,27 @@ router.post("/getmessages", async (req, res) => {
     });
 });
 router.post("/setusermessages", async (req, res) => {
-  const { ouruserid, fuserid, lastmessage, roomid } = req.body;
+  const { ouruserid, fuserid, lastmessage, roomid, type, mimeType, fileName } =
+    req.body;
   console.log("MESSAGE ID RECEIVED - ", fuserid);
   User.findOne({ _id: ouruserid })
     .then((user) => {
-      user.allmessages.map((item) => {
-        if (item.fuserid == fuserid) {
-          user.allmessages.pull(item);
-        }
-      });
+      // user.allmessages.map((item) => {
+      //   if (item.fuserid == fuserid) {
+      //     user.allmessages.pull(item);
+      //   }
+      // });
       const date = Date.now();
-      user.allmessages.push({ ouruserid, fuserid, lastmessage, roomid, date });
+      user.allmessages.push({
+        ouruserid,
+        fuserid,
+        lastmessage,
+        roomid,
+        date,
+        type,
+        mimeType,
+        fileName,
+      });
       user.save();
       res.status(200).send({ message: "Message saved successfully" });
     })

@@ -180,7 +180,7 @@ function CreateEventScreen({ navigation }) {
     } else {
       setIsLoad(true);
       await AsyncStorage.getItem("user").then((data) => {
-        // console.log(JSON.parse(data).user.email);
+        console.log(JSON.parse(data).user.profile_pic_name);
         // console.log(JSON.parse(data).user.userName);
 
         fetch(apis + "addevent", {
@@ -194,6 +194,8 @@ function CreateEventScreen({ navigation }) {
             date: date,
             fname: JSON.parse(data).user.userName,
             isPrivate: isActive == 1 ? false : true,
+            email: JSON.parse(data).user.email,
+            pic: JSON.parse(data).user.profile_pic_name,
           }),
         })
           .then((res) => res.json())
@@ -208,6 +210,8 @@ function CreateEventScreen({ navigation }) {
                   id: JSON.parse(data).user._id,
                   name: text,
                   date: date,
+                  email: JSON.parse(data).user.email,
+                  pic: JSON.parse(data).user.profile_pic_name,
                   fname: JSON.parse(data).user.userName,
                   isPrivate: isActive == 1 ? false : true,
                 }),
@@ -221,6 +225,8 @@ function CreateEventScreen({ navigation }) {
                         eventId: JSON.parse(data).user._id,
                         name: text,
                         date: date,
+                        email: JSON.parse(data).user.email,
+                        pic: JSON.parse(data).user.profile_pic_name,
                         fname: JSON.parse(data).user.userName,
                         isPrivate: isActive == 1 ? false : true,
                       })

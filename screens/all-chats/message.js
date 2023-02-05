@@ -29,6 +29,11 @@ const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
 
 export default function Message({ navigation, route }) {
+  const scrollViewRef = useRef(null);
+
+  const handleNewMessage = () => {
+    scrollViewRef.current.scrollToEnd({ animated: true });
+  };
   const { data } = route.params;
   const [error, setError] = useState(null);
 
@@ -58,11 +63,8 @@ export default function Message({ navigation, route }) {
       if (!response.canceled) {
         //  setProfileImage(response.assets[0]);
         console.log(response.assets[0].uri);
-        setImage({
-          uri: response.assets[0].uri,
-          type: response.assets[0].type,
-          name: response.assets[0].fileName,
-        });
+        setCurrentmessage(response.assets[0].uri);
+        setImage(response.assets[0].uri);
         //socket.emit("send_message", currentmessage);
       }
     }
@@ -81,7 +83,19 @@ export default function Message({ navigation, route }) {
   useEffect(() => {
     loaddata();
   }, []);
+  const [scrollEnd, setScrollEnd] = useState(true);
 
+  const handleScroll = () => {
+    setScrollEnd(false);
+  };
+
+  // useEffect(() => {
+  //   if (scrollEnd) {
+  //     if (scrollViewRef.current) {
+  //       scrollViewRef.current.scrollToEnd({ animated: true });
+  //     }
+  //   }
+  // }, [scrollEnd]);
   useEffect(() => {
     socket.on("receive_message", (data) => {
       // console.log("recieved message - ", data);
@@ -99,6 +113,11 @@ export default function Message({ navigation, route }) {
 
   useEffect(() => {
     loadMessages(roomid);
+    if (scrollEnd) {
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollToEnd({ animated: true });
+      }
+    }
   }, [chat]);
 
   const loaddata = async () => {
@@ -118,7 +137,7 @@ export default function Message({ navigation, route }) {
               console.log("our user data ", dat.user.userName);
               setOuruserdata(dat.user);
               setUserid(dat.user._id);
-
+              console.log(ouruserdata);
               fetch(apis + "otheruserdata", {
                 method: "POST",
                 headers: {
@@ -140,6 +159,7 @@ export default function Message({ navigation, route }) {
                     console.log("room id ", temproomid);
                     socket.emit("join_room", { roomid: temproomid });
                     loadMessages(temproomid);
+                    //  scrollViewRef.current.scrollToEnd({ animated: true });
                   } else {
                     alert("User Not Found");
                     navigation.navigate("HomePage");
@@ -166,73 +186,168 @@ export default function Message({ navigation, route }) {
       });
   };
   const sendMessage = async () => {
-    const setmessagedata = {
-      lastmessage: currentmessage,
-      roomid: roomid,
-      ouruserid: userid,
-      fuserid: fuserdata._id,
-    };
-    const messagedata = {
-      message: currentmessage,
-      roomid: roomid,
-      senderid: userid,
-      recieverid: fuserdata._id,
-    };
-    fetch(apis + "savemessagetodb", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(messagedata),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.message == "Message saved successfully") {
-          if (currentmessage) {
-            socket.emit("send_message", messagedata);
-          }
-          if (image) {
-            const { uri } = image;
-            console.log(uri);
-            const formData = new FormData();
-            formData.append("image", {
-              uri,
-              name: "image.jpg",
-              type: "image/jpeg",
-            });
+    // if (image) {
+    //   const setimg = {
+    //     lastmessage: image.uri,
+    //     roomid: roomid,
+    //     ouruserid: userid,
+    //     fuserid: fuserdata._id,
+    //   };
+    //   const { uri } = image;
+    //   console.log(uri);
+    //   const formData = new FormData();
+    //   formData.append("image", {
+    //     uri,
+    //     name: "image.jpg",
+    //     type: "image/jpeg",
+    //   });
 
-            socket.emit("send-image", formData);
-            setImage(null);
-          }
-
-          loadMessages(roomid);
-          console.log("message sent");
-
-          setCurrentmessage("");
-          fetch(apis + "setusermessages", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(setmessagedata),
-          })
-            .then((res) => res.json())
-            .then((data) => {
-              if (data.message == "Message saved successfully") {
-                console.log("message saved");
-              } else {
-                alert("Network Error");
-              }
-            });
-        } else {
-          alert("Network Error");
-          setCurrentmessage("");
-        }
-      })
-      .catch((e) => setError(e))
-      .catch((err) => {
-        console.log(err);
+    // socket.emit("send-image", formData);
+    // setImage(null);
+    // }
+    // let setmessagedata = {};
+    // let messagedata = {};
+    // if (image) {
+    //   setmessagedata = {
+    //     lastmessage: image.uri,
+    //     roomid: roomid,
+    //     ouruserid: userid,
+    //     fuserid: fuserdata._id,
+    //     type: "image",
+    //     mimeType: image.uri,
+    //     fileName: "image.png",
+    //   };
+    //   messagedata = {
+    //     lastmessage: image.uri,
+    //     roomid: roomid,
+    //     ouruserid: userid,
+    //     fuserid: fuserdata._id,
+    //     type: "image",
+    //     mimeType: "image.png",
+    //     fileName: "image.png",
+    //   };
+    // } else {
+    //   setmessagedata = {
+    //     lastmessage: currentmessage,
+    //     roomid: roomid,
+    //     ouruserid: userid,
+    //     fuserid: fuserdata._id,
+    //     type: "text",
+    //     mimeType: "",
+    //     fileName: "",
+    //   };
+    //   messagedata = {
+    //     message: currentmessage,
+    //     roomid: roomid,
+    //     senderid: userid,
+    //     recieverid: fuserdata._id,
+    //     type: "text",
+    //     mimeType: "",
+    //     fileName: "",
+    //   };
+    // }
+    const formData = new FormData();
+    // formData.append("image", profileImage);
+    //  AsyncStorage.setItem("img", profileImage)
+    if (image) {
+      formData.append("image", {
+        uri: image,
+        type: "image/png",
+        name: Date.now().toFixed(10) + "image.png",
       });
+      formData.append("type", "image");
+      formData.append("mimeType", "image/png");
+      formData.append("fileName", Date.now().toFixed(10) + "image.png");
+      formData.append("senderid", userid);
+      formData.append("message", currentmessage);
+      formData.append("roomid", roomid);
+      formData.append("recieverid", fuserdata._id);
+    } else {
+      formData.append("senderid", userid);
+      formData.append("message", currentmessage);
+      formData.append("roomid", roomid);
+      formData.append("recieverid", fuserdata._id);
+      formData.append("type", "text");
+      formData.append("mimeType", "");
+      formData.append("fileName", "");
+    }
+    // formData.append("userId", JSON.parse(value).user._id);
+    // let text = "text";
+
+    // const formData1 = new FormData();
+    // if (image) {
+    //   // formData1.append("image", {
+    //   //   uri: currentmessage,
+    //   //   type: "image/png",
+    //   //   name: Date.now().toFixed(10) + "image.png",
+    //   // });
+    //   formData1.append("type", "image");
+    //   formData1.append("mimeType", "image/png");
+    //   formData1.append("fileName", Date.now().toFixed(10) + "image.png");
+    //   formData1.append("ouruserid", userid);
+    //   formData1.append("lastmessage", currentmessage);
+    //   formData1.append("roomid", roomid);
+    //   formData1.append("fuserid", fuserdata._id);
+    // } else {
+    //   formData1.append("ouruserid", userid);
+    //   formData1.append("lastmessage", currentmessage);
+    //   formData1.append("roomid", roomid);
+    //   formData1.append("fuserid", fuserdata._id);
+    //   formData1.append("type", "text");
+    //   formData1.append("mimeType", "");
+    //   formData1.append("fileName", "");
+    // }
+
+    //  Date.now().toLocaleString().substring(0, 12);
+    try {
+      const res = await fetch(apis + "savemessagetodb", {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        console.log(data);
+        handleNewMessage;
+        setCurrentmessage("");
+        setImage("");
+      }
+    } catch (error) {
+      console.log(error.message);
+      setCurrentmessage("");
+      setImage("");
+    }
+    // .then((data) => {
+    //   if (data.message == "Message saved successfully") {
+    //     socket.emit("send_message", formData);
+
+    //     loadMessages(roomid);
+    //     console.log("message sent");
+
+    //     setCurrentmessage("");
+    //     fetch(apis + "setusermessages", {
+    //       method: "POST",
+    //       headers: {
+    //         "Content-Type": "multipart/form-data",
+    //       },
+    //       body: formData1,
+    //     })
+    //       .then((res) => res.json())
+    //       .then((data) => {
+    //         if (data.message == "Message saved successfully") {
+    //           //scrollViewRef.current.scrollToEnd({ animated: true });
+    //           console.log("message saved");
+    //         } else {
+    //           alert("Network Error");
+    //         }
+    //       });
+    //   } else {
+    //     alert("Network Error");
+    //     setCurrentmessage("");
+    //   }
+    // })
   };
 
   const loadMessages = (temproomid) => {
@@ -247,6 +362,8 @@ export default function Message({ navigation, route }) {
 
       .then((data) => {
         setChat(data);
+        handleNewMessage;
+        // scrollViewRef.current.scrollToEnd({ animated: true });
       })
       .catch((e) => setError(e));
   };
@@ -270,125 +387,201 @@ export default function Message({ navigation, route }) {
   }
 
   return (
-    <CustomBubble
-      bubbleColor={Colors.dark}
-      crossColor={Colors.brown}
-      navigation={navigation}
-    >
-      <View style={[styles.container]}>
-        <Text
-          style={[
-            {
-              // marginLeft: 44,
-              marginTop: 38,
-              textAlign: "center",
-              fontSize: 28,
-              color: Colors.brown,
-              fontFamily: "GothicA1-Regular",
-            },
-          ]}
-        >
-          {data.user.userName}
-        </Text>
-        <ScrollView style={styles.messageView}>
-          {chat.map((item, index) => {
-            const type = item.type || "text";
-            const img = item.type || "image";
+    <>
+      <CustomBubble
+        bubbleColor={Colors.dark}
+        crossColor={Colors.brown}
+        navigation={navigation}
+      >
+        <View style={[styles.container]}>
+          <Text
+            style={[
+              {
+                // marginLeft: 44,
+                marginTop: 38,
+                textAlign: "center",
+                fontSize: 28,
+                color: Colors.brown,
+                fontFamily: "GothicA1-Regular",
+              },
+            ]}
+          >
+            {data.user.userName}
+          </Text>
+          <ScrollView
+            ref={scrollViewRef}
+            onMomentumScrollEnd={handleScroll}
+            style={styles.messageView}
+          >
+            {chat.map((item, index) => {
+              // scrollViewRef.current.scrollToEnd({ animated: true });
 
-            return (
-              <View style={styles.message} key={index}>
-                {item.senderid == userid && type === "text" && (
-                  <View style={styles.messageRight}>
-                    <Ionicons
-                      style={{
-                        marginVertical: 10,
-                      }}
-                      name="person-circle-outline"
-                      color={Colors.white}
-                      size={38}
-                    />
-                    <Text style={styles.messageTextRight}>{item.message}</Text>
-                  </View>
-                )}
-                {item.senderid != userid && type === "text" && item != "" && (
-                  <View style={styles.messageLeft}>
-                    <Ionicons
-                      style={{
-                        marginVertical: 10,
-                      }}
-                      name="person-circle-outline"
-                      color={Colors.white}
-                      size={38}
-                    />
-                    <Text style={styles.messageTextLeft}>{item.message}</Text>
-                  </View>
-                )}
+              return (
+                <View style={styles.message} key={index}>
+                  {item.senderid == userid && item.type === "text" && (
+                    <View style={styles.messageRight}>
+                      {ouruserdata.profile_pic_name === "" ? (
+                        <Ionicons
+                          style={{
+                            marginVertical: 10,
+                          }}
+                          name="person-circle-outline"
+                          color={Colors.white}
+                          size={38}
+                        />
+                      ) : (
+                        <Image
+                          style={{
+                            marginTop: 12,
+                            width: 35,
+                            height: 35,
+                            borderRadius: 360,
+                          }}
+                          source={{ uri: ouruserdata.profile_pic_name }}
+                        />
+                      )}
+                      <Text style={styles.messageTextRight}>
+                        {item.message}
+                      </Text>
+                    </View>
+                  )}
+                  {item.senderid != userid &&
+                    item.type === "text" &&
+                    item != "" && (
+                      <View style={styles.messageLeft}>
+                        {fuserdata.profile_pic_name === "" ? (
+                          <Ionicons
+                            style={{
+                              marginVertical: 10,
+                            }}
+                            name="person-circle-outline"
+                            color={Colors.white}
+                            size={38}
+                          />
+                        ) : (
+                          <Image
+                            style={{
+                              marginTop: 12,
+                              width: 35,
+                              height: 35,
+                              borderRadius: 360,
+                            }}
+                            source={{ uri: fuserdata.profile_pic_name }}
+                          />
+                        )}
+                        <Text style={styles.messageTextLeft}>
+                          {item.message}
+                        </Text>
+                      </View>
+                    )}
 
-                {item.senderid == userid && type === "image" && (
-                  <View style={styles.messageRight}>
-                    <Ionicons
-                      style={{
-                        marginVertical: 10,
-                      }}
-                      name="person-circle-outline"
-                      color={Colors.white}
-                      size={38}
-                    />
-                    <Image
-                      style={{ width: 100, height: 100 }}
-                      source={{ uri: item.message }}
-                    />
-                  </View>
-                )}
-                {item.senderid != userid && type === "image" && item != "" && (
-                  <View style={styles.messageLeft}>
-                    <Ionicons
-                      style={{
-                        marginVertical: 10,
-                      }}
-                      name="person-circle-outline"
-                      color={Colors.white}
-                      size={38}
-                    />
-                    <Image
-                      style={{ width: 100, height: 100 }}
-                      source={{ uri: item.message }}
-                    />
-                  </View>
-                )}
-              </View>
-            );
-          })}
-        </ScrollView>
-        <View
-          style={{
-            flexDirection: "row",
-          }}
-        >
-          <Ionicons
-            onPress={handleImageUpload}
-            name="add-circle"
-            color={Colors.brown}
-            size={22}
-          />
-          <TextInput
-            style={styles.input}
-            onChangeText={(text) => setCurrentmessage(text)}
-            value={currentmessage}
-          />
-          {currentmessage || image ? (
+                  {item.senderid == userid && item.type === "image" && (
+                    <View style={styles.messageRight}>
+                      {ouruserdata.profile_pic_name === "" ? (
+                        <Ionicons
+                          style={{
+                            marginVertical: 10,
+                          }}
+                          name="person-circle-outline"
+                          color={Colors.white}
+                          size={38}
+                        />
+                      ) : (
+                        <Image
+                          style={{
+                            marginTop: 12,
+                            width: 35,
+                            height: 35,
+                            borderRadius: 360,
+                          }}
+                          source={{ uri: ouruserdata.profile_pic_name }}
+                        />
+                      )}
+                      <Image
+                        style={{
+                          width: 100,
+                          height: 100,
+                          borderRadius: 18,
+                          marginRight: 10,
+                          marginBottom: 12,
+                        }}
+                        source={{ uri: item.message }}
+                      />
+                    </View>
+                  )}
+                  {item.senderid != userid &&
+                    item.type === "image" &&
+                    item != "" && (
+                      <View style={styles.messageLeft}>
+                        {fuserdata.profile_pic_name === "" ? (
+                          <Ionicons
+                            style={{
+                              marginVertical: 10,
+                            }}
+                            name="person-circle-outline"
+                            color={Colors.white}
+                            size={38}
+                          />
+                        ) : (
+                          <Image
+                            style={{
+                              marginTop: 12,
+                              width: 35,
+                              height: 35,
+                              borderRadius: 360,
+                            }}
+                            source={{ uri: fuserdata.profile_pic_name }}
+                          />
+                        )}
+                        <Image
+                          style={{
+                            width: 100,
+                            height: 100,
+                            borderRadius: 18,
+                            marginLeft: 10,
+                            marginBottom: 12,
+                          }}
+                          source={{ uri: item.message }}
+                        />
+                      </View>
+                    )}
+                </View>
+              );
+            })}
+          </ScrollView>
+          <View
+            style={{
+              flexDirection: "row",
+            }}
+          >
             <Ionicons
-              name="send"
-              color={Colors.pink}
+              onPress={handleImageUpload}
+              name="add-circle"
+              color={Colors.brown}
               size={22}
-              onPress={() => sendMessage()}
             />
-          ) : (
-            <Ionicons name="send" color={Colors.white} size={22} />
-          )}
+            <TextInput
+              style={styles.input}
+              onChangeText={setCurrentmessage}
+              value={currentmessage}
+              onSubmitEditing={() => {
+                sendMessage();
+              }}
+            />
+            {currentmessage || image ? (
+              <Ionicons
+                name="send"
+                color={Colors.pink}
+                size={22}
+                onPress={() => sendMessage()}
+              />
+            ) : (
+              <Ionicons name="send" color={Colors.white} size={22} />
+            )}
+          </View>
         </View>
-      </View>
-    </CustomBubble>
+      </CustomBubble>
+    </>
   );
 }
 
@@ -460,7 +653,8 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 17,
     marginLeft: 15,
-
+    flex: 1,
+    textAlign: "center",
     borderRadius: 20,
     margin: 10,
   },
@@ -474,7 +668,10 @@ const styles = StyleSheet.create({
   messageTextLeft: {
     color: "white",
     backgroundColor: Colors.brown,
-
+    marginRight: 15,
+    flex: 1,
+    textAlign: "center",
+    borderRadius: 20,
     fontSize: 17,
     minWidth: 100,
     padding: 10,

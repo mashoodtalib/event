@@ -46,70 +46,67 @@ function HomePage({ navigation, route }) {
   const getLang = async () => {
     setSelectLan(parseInt(await AsyncStorage.getItem("LANG")));
   };
-<<<<<<< HEAD
   const [userdata, setUserdata] = React.useState(null);
   const [save, setSave] = React.useState(null);
 
-  useEffect(() => {
-    loaddata();
-    // console.log(save.user.email);
-  }, []);
-  const loaddata = async () => {
-    //console.log(userdata.profile_pic_name);
-    AsyncStorage.getItem("user")
-      .then(async (value) => {
-        fetch(apis + "userdata", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(value).token,
-          },
-          body: JSON.stringify({ email: JSON.parse(value).user.email }),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.message == "User Found") {
-              console.log("userdata ", userdata);
-              //  console.log("hhhhhhhhh", save);
+  // useEffect(() => {
+  //   loaddata();
+  //   // console.log(save.user.email);
+  // }, []);
+  // const loaddata = async () => {
+  //   //console.log(userdata.profile_pic_name);
+  //   AsyncStorage.getItem("user")
+  //     .then(async (value) => {
+  //       fetch(apis + "userdata", {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: "Bearer " + JSON.parse(value).token,
+  //         },
+  //         body: JSON.stringify({ email: JSON.parse(value).user.email }),
+  //       })
+  //         .then((res) => res.json())
+  //         .then((data) => {
+  //           if (data.message == "User Found") {
+  //             console.log("userdata ", userdata);
+  //             //  console.log("hhhhhhhhh", save);
 
-              setUserdata(data.user);
-            } else {
-              alert("Login Again");
-              navigation.push("Login");
-            }
-          })
-          .catch((err) => {
-            navigation.push("Login");
-          });
-      })
-      .catch((err) => {
-        navigation.push("Login");
-      });
-  };
-=======
+  //             setUserdata(data.user);
+  //           } else {
+  //             alert("Login Again");
+  //             navigation.push("Login");
+  //           }
+  //         })
+  //         .catch((err) => {
+  //           navigation.push("Login");
+  //         });
+  //     })
+  //     .catch((err) => {
+  //       navigation.push("Login");
+  //     });
+  // };
   useEffect(() => {
     Animated.timing(leftBubbleAnim, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
     }).start();
     Animated.timing(rightBubbleAnim, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
     }).start();
-}, []);
->>>>>>> 2e911a19931be83c6972eee9c6c6ddfceb375728
+  }, []);
 
   return (
     <View style={{ flex: 1, height: height }}>
       <Bubble
-      style={{
-        left: leftBubbleAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [-width, 0],
-      }),
-      }}
+        style={{
+          left: leftBubbleAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [-width, 0],
+          }),
+        }}
         onpress={() =>
           navigation.navigate(
             "allFriends",
@@ -137,10 +134,10 @@ function HomePage({ navigation, route }) {
       <Bubble
         style={{
           right: rightBubbleAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [-width, 0],
+            inputRange: [0, 1],
+            outputRange: [-width, 0],
           }),
-      }}
+        }}
         onpress={() => navigation.push("Settings", { disabledAnimation: true })}
         styleBubble={{
           backgroundColor: Colors.orange,
@@ -182,11 +179,7 @@ function HomePage({ navigation, route }) {
       />
       <Bubble
         onpress={() =>
-          navigation.navigate(
-            "ProfileScreen",
-            { data: userdata.profile_pic_name },
-            { disabledAnimation: true }
-          )
+          navigation.navigate("ProfileScreen", { disabledAnimation: true })
         }
         bubbleStyle={{
           top: hp("45%"),

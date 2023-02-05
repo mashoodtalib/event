@@ -15,6 +15,7 @@ import PrimaryButton from "../components/Primary-Button";
 import LinearGradientComponent from "../components/Linear-Gradient-component";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import apis from "../constants/static-ip";
+import { Image } from "react-native";
 const { width, height } = Dimensions.get("window");
 
 export default function RegisterScreen({ navigation }) {
@@ -61,10 +62,14 @@ export default function RegisterScreen({ navigation }) {
           .then((res) => res.json())
           .then((data) => {
             // console.log(data);
-            if (data.error) {
+            if (data.message == "Invalid email address") {
+              alert("Invalid email address");
+            } else if (data.error) {
               // alert('Invalid Credentials')
               // setLoading(false);
               setErrormsg(data.error);
+            } else if (data.message == "Email or userName Already exist") {
+              alert("Email or userName Already exist");
             } else {
               // console.log(data.udata);
               alert("User Register Successfully.Now do Login");
@@ -94,12 +99,19 @@ export default function RegisterScreen({ navigation }) {
   return (
     <LinearGradientComponent>
       <SafeAreaView style={styles.rootScreen}>
-      <View style={styles.textInputField}>
-        <Text style={styles.text}>Play</Text>
-        <Text style={styles.textLife}>Your Life</Text>
+        <Image
+          style={{ height: "10%", width: "60%" }}
+          source={require("../assets/Ondosecondary.png")}
+        />
+        <View style={styles.textInputField}>
+          <Text style={styles.text}>Play</Text>
+          <Text style={styles.textLife}>Your Life</Text>
         </View>
         {errormsg ? <Text style={styles.errormessage}>{errormsg}</Text> : null}
         <TextInput
+          onSubmitEditing={() => {
+            handleSubmit();
+          }}
           style={styles.input}
           onPressIn={() => setErrormsg(null)}
           onChangeText={(texts) => setuserName(texts)}
@@ -107,6 +119,9 @@ export default function RegisterScreen({ navigation }) {
           autoCorrect={false}
         />
         <TextInput
+          onSubmitEditing={() => {
+            handleSubmit();
+          }}
           style={styles.input}
           onPressIn={() => setErrormsg(null)}
           onChangeText={(text) => setName(text)}
@@ -115,6 +130,9 @@ export default function RegisterScreen({ navigation }) {
           autoCapitalize="words"
         />
         <TextInput
+          onSubmitEditing={() => {
+            handleSubmit();
+          }}
           style={styles.input}
           onPressIn={() => setErrormsg(null)}
           onChangeText={(text) => setemail(text)}
@@ -123,6 +141,9 @@ export default function RegisterScreen({ navigation }) {
           keyboardType="email-address"
         />
         <TextInput
+          onSubmitEditing={() => {
+            handleSubmit();
+          }}
           style={styles.input}
           onPressIn={() => setErrormsg(null)}
           onChangeText={(texts) => setpassword(texts)}

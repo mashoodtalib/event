@@ -40,12 +40,19 @@ const userSchema = new mongoose.Schema({
     type: Array,
     default: [],
   },
-
   allmessages: {
     type: Array,
     default: [],
   },
   allevents: {
+    type: Array,
+    default: [],
+  },
+  accevents: {
+    type: Array,
+    default: [],
+  },
+  acceventsfrom: {
     type: Array,
     default: [],
   },

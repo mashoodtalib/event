@@ -35,16 +35,18 @@ io.on("connection", (socket) => {
 router.post("/addevent", async (req, res) => {
   console.log("sent by client - ", req.body);
   // return
-  const { eventId, name, date, isPrivate, fname } = req.body;
+  const { eventId, name, date, isPrivate, fname, pic, email } = req.body;
   const dateString = new Date(date);
   const formattedDate = moment(dateString).format("dddd, MMMM DD, YYYY");
   console.log(formattedDate);
   const event = new Event({
+    pic: pic,
     eventId: eventId,
     name: name,
     date: formattedDate,
     isPrivate: isPrivate,
     fname: fname,
+    email: email,
   });
 
   try {
@@ -66,7 +68,7 @@ router.post("/addevent", async (req, res) => {
     return res.status(200).send({
       message: "Event Added Successfully",
       token,
-      event: { eventId, name, date, isPrivate, fname },
+      event: { eventId, name, date, isPrivate, fname, pic, email },
     });
   } catch (err) {
     console.log(err);
@@ -124,6 +126,8 @@ router.post("/eventuserdata", (req, res) => {
       following: saveduser.following,
       allmessages: saveduser.allmessages,
       allevents: saveduser.allevents,
+      accevents: saveduser.accevents,
+      acceventsfrom: saveduser.acceventsfrom,
     };
 
     // console.log(data);
@@ -148,6 +152,125 @@ router.post("/send-data", (req, res) => {
   // Send a success response
   res.json({ message: "Data sent successfully" });
 });
+router.post("/accetpEvent", (req, res) => {
+  const { acceptfrom, acceptto } = req.body;
+  console.log(acceptfrom, acceptto);
+  if (!acceptfrom || !acceptto) {
+    return res.status(422).json({ error: "Invalid Credentials" });
+  }
+  User.findOne({ email: acceptfrom })
+    .then((mainuser) => {
+      if (!mainuser) {
+        return res.status(422).json({ error: "Invalid Credentials" });
+      } else {
+        if (mainuser.accevents.includes(acceptto)) {
+          console.log("already following");
+        } else {
+          mainuser.accevents.push(acceptto);
+          mainuser.save();
+        }
+        // console.log(mainuser);
+
+        User.findOne({ email: acceptto })
+          .then((otheruser) => {
+            if (!otheruser) {
+              return res.status(422).json({ error: "Invalid Credentials" });
+            } else {
+              if (otheruser.acceventsfrom.includes(acceptfrom)) {
+                console.log("Event already followed");
+              } else {
+                otheruser.acceventsfrom.push(acceptfrom);
+                otheruser.save();
+              }
+              res.status(200).send({
+                message: "Event Accepted",
+              });
+            }
+          })
+          .catch((err) => {
+            return res.status(422).json({ error: "Server Error" });
+          });
+      }
+    })
+    .catch((err) => {
+      return res.status(422).json({ error: "Server Error" });
+    });
+});
+router.post("/checkevent", (req, res) => {
+  const { acceptfrom, acceptto } = req.body;
+  console.log(acceptfrom, acceptto);
+  if (!acceptfrom || !acceptto) {
+    return res.status(422).json({ error: "Invalid Credentials" });
+  }
+  User.findOne({ email: acceptfrom })
+    .then((mainuser) => {
+      if (!mainuser) {
+        return res.status(422).json({ error: "Invalid Credentials" });
+      } else {
+        let data = mainuser.accevents.includes(acceptto);
+        console.log(data);
+        if (data == true) {
+          res.status(200).send({
+            message: "Event in following list",
+          });
+        } else {
+          res.status(200).send({
+            message: "Event not in following list",
+          });
+        }
+      }
+    })
+    .catch((err) => {
+      return res.status(422).json({ error: "Server Error" });
+    });
+});
+
+// unfollow user
+router.post("/unfollowevent", (req, res) => {
+  const { acceptfrom, acceptto } = req.body;
+  console.log(acceptfrom, acceptto);
+  if (!acceptfrom || !acceptto) {
+    return res.status(422).json({ error: "Invalid Credentials" });
+  }
+  User.findOne({ email: acceptfrom })
+    .then((mainuser) => {
+      if (!mainuser) {
+        return res.status(422).json({ error: "Invalid Credentials" });
+      } else {
+        if (mainuser.accevents.includes(acceptto)) {
+          let index = mainuser.accevents.indexOf(acceptto);
+          mainuser.accevents.splice(index, 1);
+          mainuser.save();
+
+          User.findOne({ email: acceptto })
+            .then((otheruser) => {
+              if (!otheruser) {
+                return res.status(422).json({ error: "Invalid Credentials" });
+              } else {
+                if (otheruser.acceventsfrom.includes(acceptfrom)) {
+                  let index = otheruser.acceventsfrom.indexOf(acceptfrom);
+                  otheruser.acceventsfrom.splice(index, 1);
+                  otheruser.save();
+                }
+                res.status(200).send({
+                  message: "Event unaccepted",
+                });
+              }
+            })
+            .catch((err) => {
+              return res.status(422).json({ error: "Server Error" });
+            });
+        } else {
+          console.log("not following");
+        }
+        // console.log(mainuser);
+      }
+    })
+    .catch((err) => {
+      return res.status(422).json({ error: "Server Error" });
+    });
+});
+
 httpServer.listen(3002);
 
 module.exports = router;
