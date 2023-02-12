@@ -10,6 +10,16 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  deviceToken: {
+    type: String,
+    required: true,
+  },
+  passwordResetToken: {
+    type: String,
+  },
+  passwordResetExpires: {
+    type: String,
+  },
   email: {
     type: String,
     required: true,

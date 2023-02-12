@@ -19,4 +19,10 @@ export const language = [
   { eng: "Logout", arab: "تسجيل خروج" },
   { eng: "Change Password", arab: "تغيير كلمة المرور" },
   { eng: "Change Username", arab: "غير اسم المستخدم" },
+  { eng: "Name", arab: "اسم" },
+  { eng: "Desc", arab: "تنازلي" },
+  { eng: "Date", arab: "تاريخ" },
+  { eng: "Private", arab: "خاص" },
+  { eng: "Public", arab: "عام" },
+  { eng: "Set", arab: "تعيين" },
 ];

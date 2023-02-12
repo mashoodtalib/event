@@ -1,7 +1,12 @@
 import {
   StyleSheet,
   Text,
+  KeyboardAvoidingView,
+  Keyboard,
   View,
+  Platform,
+  PermissionsAndroid,
+  Alert,
   StatusBar,
   TextInput,
   ScrollView,
@@ -9,9 +14,6 @@ import {
   Dimensions,
   Button,
   Image,
-  FlatList,
-  TouchableOpacity,
-  ImageBackground,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
@@ -19,6 +21,7 @@ import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
+import * as Notifications from "expo-notifications";
 
 const socket = io("http://192.168.100.7:3001");
 import CustomBubble from "../../components/Custom-Bubble";
@@ -84,7 +87,27 @@ export default function Message({ navigation, route }) {
     loaddata();
   }, []);
   const [scrollEnd, setScrollEnd] = useState(true);
+  const [expoPushToken, setExpoPushToken] = useState("");
+  // useEffect(() => {
+  //   const registerForPushNotifications = async () => {
+  //     const { status } = await Notifications.requestPermissionsAsync();
+  //     if (status !== "granted") {
+  //       alert("You need to grant permission for notifications");
+  //       return;
+  //     }
+  //     const pushToken = await Notifications.getExpoPushTokenAsync();
+  //     setExpoPushToken(pushToken);
+  //     socket.emit("sendNotification", pushToken);
+  //   };
+  //   registerForPushNotifications();
+  // }, []);
 
+  // useEffect(() => {
+  //   Notifications.addNotificationReceivedListener((notification) => {
+  //     const { title, body } = notification;
+  //     Alert.alert(title, body);
+  //   });
+  // }, []);
   const handleScroll = () => {
     setScrollEnd(false);
   };
@@ -110,7 +133,13 @@ export default function Message({ navigation, route }) {
       return id2 + id1;
     }
   };
-
+  useEffect(() => {
+    socket.emit("sendNotification", {
+      recipientUserId: "63dff804a34f81821ac63539",
+      title: "Notification Title",
+      body: "Notification Body",
+    });
+  }, []);
   useEffect(() => {
     loadMessages(roomid);
     if (scrollEnd) {
@@ -308,8 +337,19 @@ export default function Message({ navigation, route }) {
         body: formData,
       });
       if (res.ok) {
-        const data = await res.json();
-        console.log(data);
+        const dat = await res.json();
+        console.log(dat);
+        fetch(apis + "send-notification", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            targetUser: data.user.deviceToken,
+            message: data.user.userName + " sent you a message",
+            title: "New Message",
+          }),
+        }).then((res) => res.json());
         handleNewMessage;
         setCurrentmessage("");
         setImage("");
@@ -349,6 +389,7 @@ export default function Message({ navigation, route }) {
     //   }
     // })
   };
+  const [keyboardType, setKeyboardType] = useState("default");
 
   const loadMessages = (temproomid) => {
     fetch(apis + "getmessages", {
@@ -560,20 +601,26 @@ export default function Message({ navigation, route }) {
               color={Colors.brown}
               size={22}
             />
-            <TextInput
-              style={styles.input}
-              onChangeText={setCurrentmessage}
-              value={currentmessage}
-              onSubmitEditing={() => {
-                sendMessage();
-              }}
-            />
+            <KeyboardAvoidingView behavior="padding">
+              <TextInput
+                keyboardType="default"
+                style={styles.input}
+                onChangeText={setCurrentmessage}
+                value={currentmessage}
+                onSubmitEditing={() => {
+                  sendMessage();
+                }}
+              />
+            </KeyboardAvoidingView>
+
             {currentmessage || image ? (
               <Ionicons
                 name="send"
                 color={Colors.pink}
                 size={22}
-                onPress={() => sendMessage()}
+                onPress={() => {
+                  sendMessage();
+                }}
               />
             ) : (
               <Ionicons name="send" color={Colors.white} size={22} />

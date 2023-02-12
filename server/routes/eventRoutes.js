@@ -1,7 +1,9 @@
 const express = require("express");
 require("dotenv").config();
 const moment = require("moment");
+const { Expo } = require("expo-server-sdk");
 
+const expo = new Expo();
 const router = express.Router();
 const mongoose = require("mongoose");
 const Event = mongoose.model("event");
@@ -16,6 +18,8 @@ const httpServer = createServer();
 const io = new Server(httpServer, {
   /* options */
 });
+const expoPushToken = "ExponentPushToken[ThiiGiEPnxQy-yWoqEhPiK]";
+
 io.on("connection", (socket) => {
   console.log("USER CONNECTED - ", socket.id);
 
@@ -23,30 +27,70 @@ io.on("connection", (socket) => {
     console.log("USER DISCONNECTED - ", socket.id);
   });
 
-  socket.on("eventName", (data) => {
-    console.log("eventName - ", data);
+  socket.on("eventNames", (data) => {
+    console.log("eventNames - ", data);
     io.emit("eventName", data);
   });
   socket.on("send-data", (selected) => {
     console.log(selected);
     socket.broadcast.emit("broadcast-selected-data", selected);
   });
+  socket.on("send_notification", (data) => {
+    //io.emit("send_notification", data);
+
+    console.log(data);
+
+    if (!expo.isExpoPushToken(expoPushToken)) {
+      console.error(
+        `Push token ${expoPushToken} is not a valid Expo push token`
+      );
+      return;
+    }
+
+    const message = {
+      to: expoPushToken,
+      sound: "default",
+      title: data.title,
+      body: data.body,
+    };
+
+    expo
+      .sendPushNotificationsAsync([message])
+      .then((ticket) => {
+        console.log(ticket);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  });
 });
 router.post("/addevent", async (req, res) => {
   console.log("sent by client - ", req.body);
   // return
-  const { eventId, name, date, isPrivate, fname, pic, email } = req.body;
+  const {
+    eventId,
+    name,
+    date,
+    isPrivate,
+    fname,
+    pic,
+    email,
+    deviceToken,
+    desc,
+  } = req.body;
   const dateString = new Date(date);
   const formattedDate = moment(dateString).format("dddd, MMMM DD, YYYY");
   console.log(formattedDate);
   const event = new Event({
     pic: pic,
     eventId: eventId,
+    desc: desc,
     name: name,
     date: formattedDate,
     isPrivate: isPrivate,
     fname: fname,
     email: email,
+    deviceToken: deviceToken,
   });
 
   try {
@@ -68,14 +112,14 @@ router.post("/addevent", async (req, res) => {
     return res.status(200).send({
       message: "Event Added Successfully",
       token,
-      event: { eventId, name, date, isPrivate, fname, pic, email },
+      event: { eventId, name, date, isPrivate, fname, pic, email, deviceToken },
     });
   } catch (err) {
     console.log(err);
   }
 });
 router.post("/setuserevents", async (req, res) => {
-  const { id, name, date, isPrivate, fname } = req.body;
+  const { id, name, date, isPrivate, fname, desc } = req.body;
   const dateString = new Date(date);
   const formattedDate = moment(dateString).format("dddd, MMMM DD, YYYY");
   console.log(formattedDate);
@@ -87,7 +131,7 @@ router.post("/setuserevents", async (req, res) => {
       //     user.allevents.pull(item);
       //   }
       // });
-      user.allevents.push({ id, name, formattedDate, isPrivate, fname });
+      user.allevents.push({ id, name, formattedDate, isPrivate, fname, desc });
       user.save();
       res.status(200).send({ message: "Event saved successfully" });
     })
@@ -125,6 +169,7 @@ router.post("/eventuserdata", (req, res) => {
       followers: saveduser.followers,
       following: saveduser.following,
       allmessages: saveduser.allmessages,
+      deviceToken: saveduser.deviceToken,
       allevents: saveduser.allevents,
       accevents: saveduser.accevents,
       acceventsfrom: saveduser.acceventsfrom,
@@ -141,17 +186,39 @@ router.post("/eventuserdata", (req, res) => {
 router.post("/send-data", (req, res) => {
   console.log(req.body);
 
-  const { selected } = req.body;
+  const { selected, mess } = req.body;
   selected.forEach((item) => {
-    console.log(item);
-    //  io.sockets.emit("send-data", item);
+    console.log(item.user.deviceToken);
+    console.log(mess);
+    const messages = [
+      {
+        to: item.user.deviceToken,
+        sound: "default",
+        title: "New Event Shared By",
+        body: mess,
+        data: {
+          title: "New Event Shared By",
+          message: mess,
+        },
+      },
+    ];
 
-    // process the data here
+    // Send the push notifications
+    expo
+      .sendPushNotificationsAsync(messages)
+      .then((ticketIds) => {
+        console.log(`Notifications sent: ${ticketIds}`);
+      })
+      .catch((error) => {
+        console.error(error);
+        res.status(500).send({ error: "Failed to send push notification" });
+      });
   });
 
-  // Send a success response
+  // Send a success response after the loop has completed processing all items
   res.json({ message: "Data sent successfully" });
 });
+
 router.post("/accetpEvent", (req, res) => {
   const { acceptfrom, acceptto } = req.body;
   console.log(acceptfrom, acceptto);

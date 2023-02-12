@@ -8,6 +8,7 @@ import {
   Dimensions,
   Image,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -153,17 +154,41 @@ export default function ProfileBubble({ navigation }) {
           { opacity: progress, transform: [{ scale }] },
         ]}
       >
-        <Text
-          style={{
-            color: Colors.pink,
-            paddingHorizontal: size / 3,
-            paddingVertical: size / 5,
-            fontSize: 24,
-            fontFamily: "GothicA1-Medium",
-          }}
-        >
-          Check
-        </Text>
+        <ScrollView style={{ marginBottom: size / 8, marginTop: size / 8 }}>
+          {userdata.allevents.map((event, index) => (
+            <View
+              style={{
+                flex: 1,
+                alignItems: "center",
+                flexDirection: "row",
+                marginLeft: size / 3,
+              }}
+              key={index}
+            >
+              <View
+                style={{
+                  height: 10,
+                  width: 10,
+                  borderRadius: 360,
+                  backgroundColor: Colors.pink,
+                }}
+              ></View>
+              <Text
+                style={{
+                  color: Colors.black,
+                  fontSize: 28,
+                  textAlign: "left",
+                  padding: 5,
+                }}
+              >
+                {event.name}
+              </Text>
+              {/* <Text>{event.fname}</Text>
+              <Text>{event.formattedDate}</Text>
+              <Text>{event.isPrivate ? "Private" : "Public"}</Text> */}
+            </View>
+          ))}
+        </ScrollView>
       </Animated.View>
       <Animated.View
         style={[

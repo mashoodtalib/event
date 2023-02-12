@@ -28,6 +28,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "caa4130e-aeb9-4073-b1dd-a647d466e41d"
+      }
+    },
+    "owner": "mashoodtalib"
   }
 }

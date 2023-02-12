@@ -104,7 +104,11 @@ export default function LoginScreen({ navigation }) {
         >
           Log In
         </PrimaryButton>
-        <Pressable onPress={() => {}}>
+        <Pressable
+          onPress={() => {
+            navigation.navigate("ForgotPassword", { disabledAnimation: true });
+          }}
+        >
           <Text style={styles.forgotText}>{"Forgot Password?"}</Text>
         </Pressable>
         <Pressable onPress={() => {}}>

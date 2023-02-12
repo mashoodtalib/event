@@ -10,6 +10,9 @@ const messageSchema = new mongoose.Schema(
     message: {
       type: String,
     },
+    deviceToken: {
+      type: String,
+    },
     roomid: {
       type: String,
       required: true,

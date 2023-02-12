@@ -27,6 +27,8 @@ import SendEvents from "./screens/send-events";
 import EventDetails from "./screens/event-details";
 import UploadProfile from "./components/uploadProfile";
 import SplashScreen from "./screens/splashScreen";
+import ForgotPassword from "./screens/forgotPassword";
+import ResetPass from "./screens/rese-pass";
 
 const Stack = createNativeStackNavigator();
 export default function AppWrapper() {
@@ -139,6 +141,16 @@ function App() {
         <Stack.Screen
           name="UploadProfile"
           component={UploadProfile}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ForgotPassword"
+          component={ForgotPassword}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ResetPass"
+          component={ResetPass}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

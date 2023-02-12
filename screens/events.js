@@ -16,17 +16,28 @@ import apis from "../constants/static-ip";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { Image } from "react-native";
+import { language } from "../constants/language";
 
 const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
 const numColumns = width > 600 ? 3 : 2;
 export default function Events() {
+  const [selectLan, setSelectLan] = useState(0);
+
   const progress = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0)).current;
   const [text, onChangeText] = React.useState("");
   const [load, setIsLoad] = useState(false);
   const navigation = useNavigation();
+  useEffect(() => {
+    getLang();
 
+    // console.log("data", data);
+  }, []);
+
+  const getLang = async () => {
+    setSelectLan(parseInt(await AsyncStorage.getItem("LANG")));
+  };
   const monthNames = [
     "January",
     "February",
@@ -86,7 +97,9 @@ export default function Events() {
       navigation={navigation}
     >
       <View style={styles.root}>
-        <Text style={styles.fontDesign}>{"Events"}</Text>
+        <Text style={styles.fontDesign}>
+          {selectLan == 0 ? language[4].eng : language[4].arab}
+        </Text>
         <View style={styles.container}>
           <FlatList
             style={{ margin: 20 }}

@@ -33,8 +33,16 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 router.post("/savemessagetodb", upload.single("image"), async (req, res) => {
-  const { senderid, message, roomid, recieverid, type, mimeType, fileName } =
-    req.body;
+  const {
+    senderid,
+    message,
+    roomid,
+    recieverid,
+    type,
+    mimeType,
+    fileName,
+    deviceToken,
+  } = req.body;
   console.log("MESSAGE RECEIVED - ", req.body);
 
   try {
@@ -45,6 +53,7 @@ router.post("/savemessagetodb", upload.single("image"), async (req, res) => {
       recieverid,
       type,
       mimeType,
+      deviceToken,
       fileName,
     });
     await newMessage.save();

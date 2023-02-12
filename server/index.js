@@ -3,10 +3,12 @@ const port = 3000;
 const cors = require("cors");
 const multer = require("multer");
 const app = express();
+
 const bodyParser = require("body-parser");
 //
 const fs = require("fs");
 const path = require("path");
+const axios = require("axios");
 
 require("./db");
 require("./models/User");
@@ -35,12 +37,41 @@ app.use(uploadMediaRoutes);
 app.use(messageRoutes);
 app.use(eventRoutes);
 
+const { addMessage, getChatHistory } = require("./models/Message");
+
 app.get("/", requireToken, (req, res) => {
   // console.log(req.user);
   res.send(req.user);
 });
+
 io.on("connection", (socket) => {
   // console.log("USER CONNECTED - ", socket.id);
+
+  // socket.on("sendMessage", async (messageData) => {
+  //   try {
+  //     const { senderid, message, recieverid, type } = messageData;
+  //     const chat = await addMessage({ senderid, message, recieverid, type });
+  //     const chatHistory = await getChatHistory({
+  //       senderid,
+  //       recieverid,
+  //     });
+  //     io.emit("chatHistory", chatHistory);
+
+  //     const receiverExpoToken = await getExpoToken(receiver);
+  //     if (receiverExpoToken) {
+  //       expoPushClient.sendPushNotificationAsync({
+  //         to: receiverExpoToken,
+  //         sound: "default",
+  //         title: "New Message",
+  //         body: `${senderid} sent you a ${
+  //           type === "text" ? "message" : "image"
+  //         }`,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // });
 
   socket.on("disconnect", () => {
     //  console.log("USER DISCONNECTED - ", socket.id);
@@ -55,25 +86,23 @@ io.on("connection", (socket) => {
     console.log("MESSAGE RECEIVED - ", data);
 
     io.emit("receive_message", data);
-
-    // else {
-    //   const imageData = data.image.replace(/^data:image\/\w+;base64,/, "");
-    //   const buf = new Buffer(imageData, "base64");
-    //   const imageName = `${new Date().getTime()}.png`;
-    //   require("fs").writeFile(`./images/${imageName}`, buf, () => {
-    //     io.emit("receive_message", {
-    //       type: "image",
-    //       url: `/uploads/${imageName}`,
-    //     });
-    //   });
-    // }
   });
-  socket.on("send-image", (image) => {
-    console.log(`Received image: ${image.name}`);
-    io.emit("receive_image", image);
+  socket.on("sendNoti", (data) => {
+    console.log("MESSAGE RECEIVED - ", data);
+
+    io.emit("recieveNoti", data);
   });
 });
-
+const sendNotification = (receiver, message) => {
+  expoPushClient.sendPushNotificationsAsync([
+    {
+      to: receiver,
+      sound: "default",
+      body: message,
+      data: { message },
+    },
+  ]);
+};
 httpServer.listen(3001);
 
 app.listen(port, () => {

@@ -31,13 +31,7 @@ import { language } from "../constants/language";
 import { Path, Svg } from "react-native-svg";
 import apis from "../constants/static-ip";
 import { useRef } from "react";
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+
 export default function SendEvents({ navigation, route }) {
   const [error, setError] = useState(null);
   const [userdataagain, setUserdataagain] = React.useState([]);
@@ -59,33 +53,6 @@ export default function SendEvents({ navigation, route }) {
   const getLang = async () => {
     setSelectLan(parseInt(await AsyncStorage.getItem("LANG")));
   };
-  const [expoPushToken, setExpoPushToken] = useState("");
-  const [notification, setNotification] = useState(false);
-  const notificationListener = useRef();
-  const responseListener = useRef();
-
-  useEffect(() => {
-    registerForPushNotificationsAsync().then((token) =>
-      setExpoPushToken(token)
-    );
-
-    notificationListener.current =
-      Notifications.addNotificationReceivedListener((notification) => {
-        setNotification(notification);
-      });
-
-    responseListener.current =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log(response);
-      });
-
-    return () => {
-      Notifications.removeNotificationSubscription(
-        notificationListener.current
-      );
-      Notifications.removeNotificationSubscription(responseListener.current);
-    };
-  }, []);
 
   const [date, setDate] = useState(new Date("April-20-2000"));
 
@@ -158,44 +125,24 @@ export default function SendEvents({ navigation, route }) {
     }
   };
   const handleSend = async () => {
-    try {
-      console.log("sss", selected);
-      await fetch(apis + "send-data", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          selected: selected,
-        }),
-      })
-        .then((res) => {
-          res.json();
-          console.log(res.json());
-          //   socket.emit("send-data", selected);
-          socket.on("broadcast-selected-data", (selectedData) => {
-            Notifications.scheduleNotificationAsync({
-              content: {
-                title: data,
-                body: "New Event Created",
-                // data: { data: navigation.push("EventDetails", { item: event }) },
-                data: { data: selectedData },
-              },
-              trigger: { seconds: 2 },
-            });
-
-            // Alert.alert("New Event", `A new event "${event.name}" has been created!`);
-          });
-          alert("New Event Has been sent");
-          navigation.navigate("HomePage", { disabledAnimation: true });
-        })
-
-        .catch((err) => console.log(err));
-
-      // console.log(response.data);
-    } catch (error) {
-      console.error(error);
+    console.log("sss", selected);
+    const response = await fetch(apis + "send-data", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        selected: selected,
+        mess: data,
+      }),
+    });
+    if (response.ok) {
+      const dat = await response.json();
+      console.log(dat);
+      navigation.navigate("HomePage");
     }
+
+    // console.log(response.data);
   };
   useEffect(() => {
     console.log(data);
@@ -205,7 +152,15 @@ export default function SendEvents({ navigation, route }) {
   }, []);
   useEffect(() => {
     if (array) {
-      array.following.forEach((item) => {
+      let allData = array.following.concat(array.followers);
+
+      let uniqueData = allData.filter(
+        (value, index, self) => self.indexOf(value) === index
+      );
+
+      console.log(uniqueData);
+
+      uniqueData.forEach((item) => {
         console.log(item);
         const fetchData2 = async () => {
           try {

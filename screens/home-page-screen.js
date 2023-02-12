@@ -24,14 +24,26 @@ import Bubble from "../components/Bubble";
 import { language } from "../constants/language";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import apis from "../constants/static-ip";
+import io from "socket.io-client";
+import * as Device from "expo-device";
 
+import * as Notifications from "expo-notifications";
+import { useNavigation } from "@react-navigation/native";
+
+const socket = io("http://192.168.100.7:3001");
 const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
-function HomePage({ navigation, route }) {
+function HomePage() {
   const [selectLan, setSelectLan] = useState(0);
   const [leftBubbleAnim, setLeftBubbleAnim] = useState(new Animated.Value(0));
   const [rightBubbleAnim, setRightBubbleAnim] = useState(new Animated.Value(0));
-  const { data } = route.params;
+  const [saveNot, issaveNot] = useState("");
+  const navigation = useNavigation();
+  const [expoPushToken, setExpoPushToken] = useState("");
+  const [notification, setNotification] = useState(false);
+  const notificationListener = useRef();
+  const responseListener = useRef();
+
   AsyncStorage.getItem("user")
     .then((data) => {
       // console.log("data", data);
@@ -40,6 +52,8 @@ function HomePage({ navigation, route }) {
 
   useEffect(() => {
     getLang();
+    console.log(saveNot);
+
     // console.log("data", data);
   }, []);
 

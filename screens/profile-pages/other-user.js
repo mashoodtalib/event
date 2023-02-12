@@ -7,6 +7,7 @@ import {
   Animated,
   Dimensions,
   Image,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -109,6 +110,17 @@ export default function OtherUser({ navigation, route }) {
         if (data.message == "User Followed") {
           console.log(data);
           alert("Followed");
+          fetch(apis + "send-notification", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              targetUser: userdata.deviceToken,
+              message: userdata.userName + " following",
+              title: "New Friend",
+            }),
+          }).then((res) => res.json());
           loaddata();
           setIsfollowing(true);
         } else {
@@ -164,6 +176,17 @@ export default function OtherUser({ navigation, route }) {
       .then((data) => {
         if (data.message == "User Unfollowed") {
           alert("User Unfollowed");
+          fetch(apis + "send-notification", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              targetUser: userdata.deviceToken,
+              message: userdata.userName + " unfollowing",
+              title: "Old Friend",
+            }),
+          }).then((res) => res.json());
           loaddata();
           setIsfollowing(false);
         } else {
@@ -194,7 +217,44 @@ export default function OtherUser({ navigation, route }) {
 
           { opacity: progress, transform: [{ scale }] },
         ]}
-      />
+      >
+        <ScrollView style={{ marginTop: size / 8, marginBottom: size / 8 }}>
+          {userdata.allevents.map((event, index) => (
+            <View
+              style={{
+                flex: 1,
+                alignItems: "center",
+                flexDirection: "row",
+                marginLeft: size / 3,
+              }}
+              key={index}
+            >
+              <View
+                style={{
+                  height: 10,
+                  width: 10,
+                  borderRadius: 360,
+                  backgroundColor: Colors.pink,
+                }}
+              ></View>
+              <Text
+                style={{
+                  color: Colors.black,
+                  fontSize: 28,
+                  textAlign: "left",
+                  padding: 5,
+                }}
+              >
+                {event.name}
+              </Text>
+              {/* <Text>{event.fname}</Text>
+              <Text>{event.formattedDate}</Text>
+              <Text>{event.isPrivate ? "Private" : "Public"}</Text> */}
+            </View>
+          ))}
+        </ScrollView>
+      </Animated.View>
+
       <Animated.View
         style={[
           styles.icon,
@@ -233,20 +293,10 @@ export default function OtherUser({ navigation, route }) {
           <Text style={[styles.fonts, { color: Colors.brown }]}>
             @{userdata.userName}
           </Text>
-          <Text
-            onPress={() => {
-              setModalVisible(!modalVisible);
-            }}
-            style={[styles.fonts, { color: Colors.white }]}
-          >
+          <Text style={[styles.fonts, { color: Colors.white }]}>
             {userdata.bio === "" ? "bio" : userdata.bio}
           </Text>
-          <Text
-            onPress={() => {
-              setModalVisible1(!modalVisible);
-            }}
-            style={[styles.fonts, { color: Colors.brown }]}
-          >
+          <Text style={[styles.fonts, { color: Colors.brown }]}>
             {userdata.links === "" ? "links" : userdata.links}
           </Text>
         </View>
@@ -306,16 +356,6 @@ export default function OtherUser({ navigation, route }) {
           )}
         </Animated.View>
       </Animated.View>
-      <ChangedBio
-        navigation={navigation}
-        modalVisible={modalVisible}
-        setModalVisible={setModalVisible}
-      />
-      <ChangedLinks
-        navigation={navigation}
-        modalVisible1={modalVisible1}
-        setModalVisible1={setModalVisible1}
-      />
     </View>
   ) : (
     <ActivityIndicator />

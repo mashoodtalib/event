@@ -119,6 +119,17 @@ function EventDetails({ navigation, route }) {
         if (data.message == "Event Accepted") {
           console.log(data);
           alert("Event Accepted");
+          fetch(apis + "send-notification", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              targetUser: set.deviceToken,
+              message: item.fname + " Accepted your Event",
+              title: "Events",
+            }),
+          }).then((res) => res.json());
           loaddata();
           setIsfollowing(true);
         } else {
@@ -174,6 +185,17 @@ function EventDetails({ navigation, route }) {
       .then((data) => {
         if (data.message == "Event unaccepted") {
           alert("Event unaccepted");
+          fetch(apis + "send-notification", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              targetUser: set.deviceToken,
+              message: item.fname + " UnAccepted your Event",
+              title: "Events",
+            }),
+          }).then((res) => res.json());
           loaddata();
           setIsfollowing(false);
         } else {
@@ -240,7 +262,7 @@ function EventDetails({ navigation, route }) {
             justifyContent: "center",
           }}
         >
-          we are having a party at my place
+          {item.desc}
         </Text>
         <View
           style={{

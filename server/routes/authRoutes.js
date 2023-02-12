@@ -1,4 +1,5 @@
 const express = require("express");
+const crypto = require("crypto");
 
 const router = express.Router();
 const mongoose = require("mongoose");
@@ -10,8 +11,10 @@ const validator = require("validator");
 
 // //
 const bcrypt = require("bcrypt");
+const { Expo } = require("expo-server-sdk");
 
 const nodemailer = require("nodemailer");
+const expo = new Expo();
 
 // nodemailer
 async function mailer(recieveremail, code) {
@@ -22,8 +25,8 @@ async function mailer(recieveremail, code) {
     secure: false, // true for 465, false for other ports
     requireTLS: true,
     auth: {
-      user: process.env.Nodemail_email, // generated ethereal user
-      pass: process.env.Nodemail_password, // generated ethereal password
+      user: "talibmashood@gmail.com",
+      pass: "qzbjqhvkecstcelu", // generated ethereal password
     },
   });
 
@@ -42,18 +45,72 @@ async function mailer(recieveremail, code) {
 }
 
 // //
+const generatePasswordResetToken = () => {
+  return crypto.randomBytes(32).toString("hex");
+};
+
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      return res.status(404).send({ error: "User not found" });
+    }
+    const passwordResetToken = generatePasswordResetToken();
+    user.passwordResetToken = passwordResetToken;
+    user.passwordResetExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "talibmashood@gmail.com",
+        pass: "qzbjqhvkecstcelu",
+      },
+    });
+    const mailOptions = {
+      from: "talibmashood@gmail.com",
+      to: user.email,
+      subject: "Password reset",
+      text: `Reset Password Confirmation is Set`,
+    };
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        return res.status(500).send({ error: "Server error" });
+      }
+      return res.send({ message: "Password reset email sent" });
+    });
+  } catch (error) {
+    return res.status(500).send({ error: "Server error" });
+  }
+});
+router.post("/reset-password", async (req, res) => {
+  try {
+    const user = await User.findOne({
+      passwordResetToken: req.body.passwordResetToken,
+      passwordResetExpires: { $gt: Date.now() },
+    });
+    if (!user) {
+      return res.status(400).send({ error: "Invalid password reset token" });
+    }
+    user.password = req.body.password;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+    return res.send({ message: "Password reset successful" });
+  } catch (error) {
+    return res.status(500).send({ error: "Server error" });
+  }
+});
 
 router.post("/signup", async (req, res) => {
   console.log("sent by client - ", req.body);
-  const { userName, name, email, password } = req.body;
+  const { userName, name, email, password, deviceToken } = req.body;
 
   if (!validator.isEmail(email)) {
     res.send({
-      error: true,
       message: "Invalid email address",
     });
     User.findOne({ email: email, userName: userName }).then((userdata) => {
-      res.status(200).send({
+      res.send({
         message: "Email or userName Already exist",
       });
     });
@@ -63,6 +120,7 @@ router.post("/signup", async (req, res) => {
       name,
       email,
       password,
+      deviceToken,
     });
     try {
       await user.save();
@@ -137,7 +195,33 @@ router.post("/verify", (req, res) => {
     }
   });
 });
+router.post("/verifyfp", (req, res) => {
+  console.log("sent by client", req.body);
+  const { email } = req.body;
 
+  if (!email) {
+    return res.status(422).json({ error: "Please add all the fields" });
+  }
+
+  User.findOne({ email: email }).then(async (savedUser) => {
+    if (savedUser) {
+      try {
+        let VerificationCode = Math.floor(100000 + Math.random() * 900000);
+        await mailer(email, VerificationCode);
+        console.log("Verification Code", VerificationCode);
+        res.send({
+          message: "Verification Code Sent to your Email",
+          VerificationCode,
+          email,
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    } else {
+      return res.status(422).json({ error: "Invalid Credentials" });
+    }
+  });
+});
 router.post("/signin", (req, res) => {
   const { userName, password } = req.body;
 
@@ -161,6 +245,7 @@ router.post("/signin", (req, res) => {
                 userName: savedUser.userName,
                 name: savedUser.name,
                 email: savedUser.email,
+                deviceToken: savedUser.deviceToken,
                 profile_pic_name: savedUser.profile_pic_name,
                 bio: savedUser.bio,
                 links: savedUser.links,
@@ -170,6 +255,9 @@ router.post("/signin", (req, res) => {
                 allevents: savedUser.allevents,
                 accevents: savedUser.accevents,
                 acceventsfrom: savedUser.acceventsfrom,
+
+                passwordResetToken: savedUser.passwordResetToken,
+                passwordResetExpires: savedUser.passwordResetExpires,
               };
               //   const { _id, userName, password, email } = savedUser;
 
@@ -377,6 +465,7 @@ router.post("/otheruserdata", (req, res) => {
       _id: saveduser._id,
       userName: saveduser.userName,
       name: saveduser.name,
+      deviceToken: saveduser.deviceToken,
       email: saveduser.email,
       profile_pic_name: saveduser.profile_pic_name,
       bio: saveduser.bio,
@@ -386,6 +475,8 @@ router.post("/otheruserdata", (req, res) => {
       allmessages: saveduser.allmessages,
       allevents: saveduser.allevents,
       accevents: saveduser.accevents,
+      passwordResetToken: saveduser.passwordResetToken,
+      passwordResetExpires: saveduser.passwordResetExpires,
       acceventsfrom: saveduser.acceventsfrom,
     };
 
@@ -426,6 +517,7 @@ router.post("/getuserbyid", (req, res) => {
         _id: saveduser._id,
         userName: saveduser.userName,
         name: saveduser.name,
+        deviceToken: saveduser.deviceToken,
         email: saveduser.email,
         profile_pic_name: saveduser.profile_pic_name,
         bio: saveduser.bio,
@@ -569,4 +661,41 @@ router.post("/unfollowuser", (req, res) => {
       return res.status(422).json({ error: "Server Error" });
     });
 });
+
+router.post("/send-notification", (req, res) => {
+  const targetUser = req.body.targetUser;
+  const message = req.body.message;
+  const title = req.body.title;
+
+  // User.findOne({ deviceToken: targetUser }).then((save));
+  // Get the target user's device token from the database based on their identifier
+  //const deviceToken = getDeviceTokenFromDatabase(targetUser);
+
+  // Create a new push notification and add it to the messages array
+  const messages = [
+    {
+      to: targetUser,
+      sound: "default",
+      title: title,
+      body: message,
+      data: {
+        title: title,
+        message: message,
+      },
+    },
+  ];
+
+  // Send the push notifications
+  expo
+    .sendPushNotificationsAsync(messages)
+    .then((ticketIds) => {
+      console.log(`Notifications sent: ${ticketIds}`);
+      res.send({ success: true });
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send({ error: "Failed to send push notification" });
+    });
+});
+
 module.exports = router;

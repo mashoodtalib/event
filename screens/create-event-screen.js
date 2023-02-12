@@ -35,20 +35,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const socket = io("http://192.168.100.7:3002");
 import apis from "../constants/static-ip";
+import { ScrollView } from "react-native";
+import { language } from "../constants/language";
 
 const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
 function CreateEventScreen({ navigation }) {
   const [isActive, setIsActive] = useState();
   const [load, setIsLoad] = useState(false);
+  const [selectLan, setSelectLan] = useState(0);
 
   const month = [
     "Jan",
@@ -64,35 +60,39 @@ function CreateEventScreen({ navigation }) {
     "Nov",
     "Dec",
   ];
-  const [expoPushToken, setExpoPushToken] = useState("");
-  const [notification, setNotification] = useState(false);
-  const notificationListener = useRef();
-  const responseListener = useRef();
-
   useEffect(() => {
-    registerForPushNotificationsAsync().then((token) =>
-      setExpoPushToken(token)
-    );
+    getLang();
 
-    notificationListener.current =
-      Notifications.addNotificationReceivedListener((notification) => {
-        setNotification(notification);
-      });
-
-    responseListener.current =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log(response);
-      });
-
-    return () => {
-      Notifications.removeNotificationSubscription(
-        notificationListener.current
-      );
-      Notifications.removeNotificationSubscription(responseListener.current);
-    };
+    // console.log("data", data);
   }, []);
 
-  const [date, setDate] = useState(new Date("April-20-2000"));
+  const getLang = async () => {
+    setSelectLan(parseInt(await AsyncStorage.getItem("LANG")));
+  };
+  // useEffect(() => {
+  //   registerForPushNotificationsAsync().then((token) =>
+  //     setExpoPushToken(token)
+  //   );
+
+  //   notificationListener.current =
+  //     Notifications.addNotificationReceivedListener((notification) => {
+  //       setNotification(notification);
+  //     });
+
+  //   responseListener.current =
+  //     Notifications.addNotificationResponseReceivedListener((response) => {
+  //       console.log(response);
+  //     });
+
+  //   return () => {
+  //     Notifications.removeNotificationSubscription(
+  //       notificationListener.current
+  //     );
+  //     Notifications.removeNotificationSubscription(responseListener.current);
+  //   };
+  // }, []);
+
+  const [date, setDate] = useState(new Date());
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate;
@@ -107,60 +107,61 @@ function CreateEventScreen({ navigation }) {
       is24Hour: true,
     });
   };
-  async function registerForPushNotificationsAsync() {
-    let token;
+  // async function registerForPushNotificationsAsync() {
+  //   let token;
 
-    if (Platform.OS === "android") {
-      await Notifications.setNotificationChannelAsync("default", {
-        name: "default",
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#FF231F7C",
-      });
-    }
+  //   if (Platform.OS === "android") {
+  //     await Notifications.setNotificationChannelAsync("default", {
+  //       name: "default",
+  //       importance: Notifications.AndroidImportance.MAX,
+  //       vibrationPattern: [0, 250, 250, 250],
+  //       lightColor: "#FF231F7C",
+  //     });
+  //   }
 
-    if (Device.isDevice) {
-      const { status: existingStatus } =
-        await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-      if (existingStatus !== "granted") {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-      if (finalStatus !== "granted") {
-        alert("Failed to get push token for push notification!");
-        return;
-      }
-      token = (await Notifications.getExpoPushTokenAsync()).data;
-      console.log(token);
-    } else {
-      alert("Must use physical device for Push Notifications");
-    }
+  //   if (Device.isDevice) {
+  //     const { status: existingStatus } =
+  //       await Notifications.getPermissionsAsync();
+  //     let finalStatus = existingStatus;
+  //     if (existingStatus !== "granted") {
+  //       const { status } = await Notifications.requestPermissionsAsync();
+  //       finalStatus = status;
+  //     }
+  //     if (finalStatus !== "granted") {
+  //       alert("Failed to get push token for push notification!");
+  //       return;
+  //     }
+  //     token = (await Notifications.getExpoPushTokenAsync()).data;
+  //     console.log(token);
+  //   } else {
+  //     alert("Must use physical device for Push Notifications");
+  //   }
 
-    return token;
-  }
-  useEffect(() => {
-    // const socket = io("http://192.168.100.7:3002");
-    socket.on("eventName", (event) => {
-      Notifications.scheduleNotificationAsync({
-        content: {
-          title: event.name,
-          body: event.date,
-          data: { data: navigation.push("EventDetails", { item: event }) },
-          //  data: { data: "hoes" },
-        },
-        trigger: { seconds: 2 },
-      });
+  //   return token;
+  // }
+  // useEffect(() => {
+  //   // const socket = io("http://192.168.100.7:3002");
+  //   socket.on("eventName", (event) => {
+  //     Notifications.scheduleNotificationAsync({
+  //       content: {
+  //         title: event.name,
+  //         body: event.date,
+  //         data: { data: navigation.push("EventDetails", { item: event }) },
+  //         //  data: { data: "hoes" },
+  //       },
+  //       trigger: { seconds: 2 },
+  //     });
 
-      // Alert.alert("New Event", `A new event "${event.name}" has been created!`);
-    });
-  }, []);
+  //     // Alert.alert("New Event", `A new event "${event.name}" has been created!`);
+  //   });
+  // }, []);
   const showDatepicker = () => {
     showMode("date");
   };
   // const d = new Date("July 21, 1983 01:15:00");
 
   const [text, onChangeText] = React.useState("");
+  const [desc, onChangeDesc] = React.useState("");
 
   const progress = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0)).current;
@@ -175,7 +176,7 @@ function CreateEventScreen({ navigation }) {
   ];
   const eventSet = async () => {
     console.log("****");
-    if (text === "" || date === "") {
+    if (text === "" || date === "" || desc === "") {
       alert("Please fill all the fields");
     } else {
       setIsLoad(true);
@@ -192,7 +193,9 @@ function CreateEventScreen({ navigation }) {
             eventId: JSON.parse(data).user._id,
             name: text,
             date: date,
+            desc: desc,
             fname: JSON.parse(data).user.userName,
+            deviceToken: JSON.parse(data).user.deviceToken,
             isPrivate: isActive == 1 ? false : true,
             email: JSON.parse(data).user.email,
             pic: JSON.parse(data).user.profile_pic_name,
@@ -210,6 +213,7 @@ function CreateEventScreen({ navigation }) {
                   id: JSON.parse(data).user._id,
                   name: text,
                   date: date,
+                  desc: desc,
                   email: JSON.parse(data).user.email,
                   pic: JSON.parse(data).user.profile_pic_name,
                   fname: JSON.parse(data).user.userName,
@@ -225,6 +229,7 @@ function CreateEventScreen({ navigation }) {
                         eventId: JSON.parse(data).user._id,
                         name: text,
                         date: date,
+                        desc: desc,
                         email: JSON.parse(data).user.email,
                         pic: JSON.parse(data).user.profile_pic_name,
                         fname: JSON.parse(data).user.userName,
@@ -235,6 +240,7 @@ function CreateEventScreen({ navigation }) {
                     console.log("Event Added Successfully", data);
                   }
                 });
+
               alert("Event Added Successfully");
               navigation.navigate(
                 "SendEvents",
@@ -257,99 +263,135 @@ function CreateEventScreen({ navigation }) {
       crossColor={Colors.pink}
       navigation={navigation}
     >
-      <View style={styles.root}>
-        <Text style={styles.fontDesign}>{"Create \n Event"}</Text>
-        <View style={styles.anRoot}>
-          <Text style={styles.fontDesign}>Name </Text>
-          <TextInput
-            textAlign="center"
-            cursorColor={Colors.brown}
-            style={styles.input}
-            onChangeText={onChangeText}
-            value={text}
-          />
-        </View>
-        <View style={styles.anRoot}>
-          <Text style={styles.fontDesign}>Date </Text>
-          <Pressable
-            // style={styles.input}
-            onPress={showDatepicker}
-            title="Pick Date"
-          >
-            <View style={{ flexDirection: "row" }}>
-              <View style={[styles.dateIn, { height: 25, width: 30 }]}>
-                <Text style={styles.fontDesign1}>
-                  {date.getDate().toLocaleString()}
-                </Text>
-              </View>
-              <View style={[styles.dateIn, { height: 25, width: 40 }]}>
-                <Text style={styles.fontDesign1}>
-                  {date.getFullYear().toLocaleString()}
-                </Text>
-              </View>
-              <View style={[styles.dateIn, { height: 25, width: 50 }]}>
-                <Text style={styles.fontDesign1}>
-                  {month[date.getMonth().toLocaleString()]}
-                </Text>
-              </View>
-            </View>
-          </Pressable>
-        </View>
-
-        <View
-          style={{
-            marginTop: size / 13,
-            marginRight: size / 7,
-            flexDirection: "row",
-          }}
-        >
-          <Text style={[styles.fontDesign, { marginRight: 5 }]}>Privacy </Text>
-          <View style={{ flexDirection: "column" }}>
-            {/* To create radio buttons, loop through your array of options */}
-            {radio_props.map((obj, i) => (
-              <RadioButton labelHorizontal={false} key={i}>
-                {/*  You can set RadioButtonLabel before RadioButtonInput */}
-                <View style={styles.lanItem}>
-                  <RadioButtonInput
-                    obj={obj}
-                    index={i}
-                    isSelected={isActive === i}
-                    onPress={(value) => setIsActive(value)}
-                    borderWidth={0}
-                    buttonInnerColor={Colors.pink}
-                    buttonOuterColor={Colors.white}
-                    buttonSize={12}
-                    buttonOuterSize={18}
-                    // buttonStyle={{}}
-                    // buttonWrapStyle={{ marginLeft: 10 }}
-                  />
-                  <RadioButtonLabel
-                    obj={obj}
-                    index={i}
-                    onPress={(value) => setIsActive(value)}
-                    labelStyle={[
-                      styles.fontDesign1,
-                      { color: Colors.pink, fontSize: 14, marginLeft: 4 },
-                    ]}
-                  />
-                </View>
-              </RadioButton>
-            ))}
+      <ScrollView
+        style={{ marginBottom: size / 10, marginTop: size / 13, height: 100 }}
+      >
+        <View style={styles.root}>
+          <Text style={styles.fontDesign}>
+            {selectLan == 0 ? language[2].eng : language[2].arab}
+          </Text>
+          <View style={styles.anRoot}>
+            <Text style={styles.fontDesign}>
+              {selectLan == 0 ? language[20].eng : null}
+            </Text>
+            <TextInput
+              textAlign="center"
+              cursorColor={Colors.brown}
+              style={styles.input}
+              onChangeText={onChangeText}
+              value={text}
+            />
+            <Text style={styles.fontDesign}>
+              {selectLan == 0 ? null : language[20].arab}
+            </Text>
           </View>
-        </View>
-        {!load ? (
-          <Pressable
-            style={[styles.dateIn, { height: 25, width: 50, marginTop: 8 }]}
-            onPress={() => {
-              eventSet();
+          <View style={styles.anRoot}>
+            <Text style={styles.fontDesign}>
+              {selectLan == 0 ? language[21].eng : null}
+            </Text>
+            <TextInput
+              textAlign="center"
+              cursorColor={Colors.brown}
+              style={[styles.input]}
+              onChangeText={onChangeDesc}
+              value={desc}
+            />
+            <Text style={styles.fontDesign}>
+              {selectLan == 0 ? null : language[21].arab}
+            </Text>
+          </View>
+          <View style={styles.anRoot}>
+            <Text style={styles.fontDesign}>
+              {selectLan == 0 ? language[22].eng : null}
+            </Text>
+            <Pressable
+              // style={styles.input}
+              onPress={showDatepicker}
+              title="Pick Date"
+            >
+              <View style={{ flexDirection: "row" }}>
+                <View style={[styles.dateIn, { height: 25, width: 30 }]}>
+                  <Text style={styles.fontDesign1}>
+                    {date.getDate().toLocaleString()}
+                  </Text>
+                </View>
+                <View style={[styles.dateIn, { height: 25, width: 40 }]}>
+                  <Text style={styles.fontDesign1}>
+                    {date.getFullYear().toLocaleString()}
+                  </Text>
+                </View>
+                <View style={[styles.dateIn, { height: 25, width: 50 }]}>
+                  <Text style={styles.fontDesign1}>
+                    {month[date.getMonth().toLocaleString()]}
+                  </Text>
+                </View>
+              </View>
+            </Pressable>
+            <Text style={styles.fontDesign}>
+              {selectLan == 0 ? null : language[22].arab}
+            </Text>
+          </View>
+
+          <View
+            style={{
+              marginTop: size / 13,
+              marginRight: size / 7,
+              flexDirection: "row",
             }}
           >
-            <Text style={styles.fontDesign1}>Set</Text>
-          </Pressable>
-        ) : (
-          <ActivityIndicator />
-        )}
-      </View>
+            <Text style={[styles.fontDesign, { marginRight: 5 }]}>
+              Privacy{" "}
+            </Text>
+            <View style={{ flexDirection: "column" }}>
+              {/* To create radio buttons, loop through your array of options */}
+              {radio_props.map((obj, i) => (
+                <RadioButton labelHorizontal={false} key={i}>
+                  {/*  You can set RadioButtonLabel before RadioButtonInput */}
+                  <View style={styles.lanItem}>
+                    <RadioButtonInput
+                      obj={obj}
+                      index={i}
+                      isSelected={isActive === i}
+                      onPress={(value) => setIsActive(value)}
+                      borderWidth={0}
+                      buttonInnerColor={Colors.pink}
+                      buttonOuterColor={Colors.white}
+                      buttonSize={12}
+                      buttonOuterSize={18}
+                      // buttonStyle={{}}
+                      // buttonWrapStyle={{ marginLeft: 10 }}
+                    />
+                    <RadioButtonLabel
+                      obj={obj}
+                      index={i}
+                      onPress={(value) => setIsActive(value)}
+                      labelStyle={[
+                        styles.fontDesign1,
+                        { color: Colors.pink, fontSize: 14, marginLeft: 4 },
+                      ]}
+                    />
+                  </View>
+                </RadioButton>
+              ))}
+            </View>
+          </View>
+          {!load ? (
+            <Pressable
+              style={[styles.dateIn, { height: 25, width: 50, marginTop: 8 }]}
+              onPress={() => {
+                eventSet();
+              }}
+            >
+              <Text style={styles.fontDesign1}>
+                {" "}
+                {selectLan == 0 ? language[23].eng : language[23].arab}
+              </Text>
+            </Pressable>
+          ) : (
+            <ActivityIndicator />
+          )}
+        </View>
+      </ScrollView>
     </CustomBubble>
   );
 }
@@ -357,7 +399,7 @@ export default CreateEventScreen;
 
 const styles = StyleSheet.create({
   root: {
-    marginTop: size / 13,
+    marginBottom: size / 10,
     flex: 1,
     alignItems: "center",
     flexDirection: "column",
