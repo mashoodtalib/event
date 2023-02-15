@@ -263,12 +263,14 @@ function CreateEventScreen({ navigation }) {
       crossColor={Colors.pink}
       navigation={navigation}
     >
-      <View style={{ flex: 1, flexDirection: "column", marginHorizontal: 18 }}>
+      <View
+        style={{ width: "100%", flexDirection: "column", marginHorizontal: 6 }}
+      >
         <ScrollView
           showsVerticalScrollIndicator={true}
           style={{
             marginBottom: size / 10,
-            marginTop: size / 8,
+            marginTop: size / 12,
             height: "100%",
           }}
         >
@@ -340,7 +342,7 @@ function CreateEventScreen({ navigation }) {
 
             <View
               style={{
-                marginTop: size / 13,
+                marginTop: size / 25,
                 marginRight: size / 7,
                 flexDirection: "row",
               }}
@@ -413,7 +415,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
   },
   anRoot: {
-    marginTop: size / 13,
+    marginTop: size / 25,
     flexDirection: "row",
     alignItems: "center",
   },
