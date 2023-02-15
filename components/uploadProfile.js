@@ -18,6 +18,7 @@ import CustomBubble from "../components/Custom-Bubble";
 import * as ImagePicker from "expo-image-picker";
 import apis from "../constants/static-ip";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Alert } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
@@ -73,8 +74,13 @@ const UploadProfile = ({ navigation }) => {
         });
         if (response.ok) {
           const data = await response.json();
-          alert("Image Uploaded Successfully");
-          navigation.navigate("Login");
+          Alert.alert("Image Uploaded Successfully");
+          const parsedUserData = JSON.parse(value);
+          console.log(parsedUserData.user.profile_pic_name);
+          parsedUserData.user.profile_pic_name = profileImage;
+          await AsyncStorage.setItem("user", JSON.stringify(parsedUserData));
+          navigation.navigate("HomePage");
+
           console.log("data", data);
         }
 

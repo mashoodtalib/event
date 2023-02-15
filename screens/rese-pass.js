@@ -41,7 +41,7 @@ const ResetPass = ({ navigation, route }) => {
           })
             .then((res) => res.json())
             .then((data) => {
-              alert("Successfully change Pass");
+              Alert.alert("Successfully change Pass");
               navigation.navigate("Login");
             });
         });

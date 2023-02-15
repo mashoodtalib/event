@@ -14,6 +14,7 @@ import CustomBubble from "../../components/Custom-Bubble";
 import { language } from "../../constants/language";
 import ChangePassword from "../../components/change-password";
 import ChangeUserName from "../../components/change-username";
+import { Alert } from "react-native";
 const { width, height } = Dimensions.get("window");
 const size = Math.min(width, height) - 1;
 
@@ -24,7 +25,7 @@ export default function YourAccount({ navigation }) {
 
   const logout = () => {
     AsyncStorage.removeItem("user").then(() => {
-      alert("Logged out successfully");
+      Alert.alert("Logged out successfully");
       navigation.navigate("Login");
     });
   };

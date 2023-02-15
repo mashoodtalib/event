@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Colors from "../constants/colors";
+import { useState } from "react";
 
 export default function Bubble({
   styleBubble,
@@ -20,13 +21,30 @@ export default function Bubble({
   textStyle,
   textMessage,
 }) {
+  const [position] = useState(new Animated.Value(0));
+
   const progress = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0)).current;
+  // useEffect(() => {
+  //   Animated.timing(progress, { toValue: 1, useNativeDriver: true }).start();
+  //   Animated.timing(scale, { toValue: 1, useNativeDriver: true }).start();
+  // }, []);
   useEffect(() => {
-    Animated.timing(progress, { toValue: 1, useNativeDriver: true }).start();
-    Animated.timing(scale, { toValue: 1, useNativeDriver: true }).start();
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(position, {
+          toValue: 10,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(position, {
+          toValue: 0,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
   }, []);
-
   return (
     <View style={bubbleStyle}>
       <Pressable onPress={onpress}>
@@ -35,7 +53,13 @@ export default function Bubble({
             styles.itemLoc,
             styles.item,
             styleBubble,
-            { opacity: progress, transform: [{ scale }] },
+            {
+              transform: [{ translateY: position }],
+              opacity: position.interpolate({
+                inputRange: [0, 10],
+                outputRange: [1, 5],
+              }),
+            },
           ]}
         >
           <Ionicons name={iconName} color={iconColor} size={iconSize} />

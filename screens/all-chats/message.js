@@ -468,14 +468,14 @@ export default function Message({ navigation, route }) {
                           }}
                           name="person-circle-outline"
                           color={Colors.white}
-                          size={38}
+                          size={25}
                         />
                       ) : (
                         <Image
                           style={{
-                            marginTop: 12,
-                            width: 35,
-                            height: 35,
+                            marginTop: 10,
+                            width: 25,
+                            height: 25,
                             borderRadius: 360,
                           }}
                           source={{ uri: ouruserdata.profile_pic_name }}
@@ -497,14 +497,14 @@ export default function Message({ navigation, route }) {
                             }}
                             name="person-circle-outline"
                             color={Colors.white}
-                            size={38}
+                            size={25}
                           />
                         ) : (
                           <Image
                             style={{
-                              marginTop: 12,
-                              width: 35,
-                              height: 35,
+                              marginTop: 10,
+                              width: 25,
+                              height: 25,
                               borderRadius: 360,
                             }}
                             source={{ uri: fuserdata.profile_pic_name }}
@@ -525,14 +525,14 @@ export default function Message({ navigation, route }) {
                           }}
                           name="person-circle-outline"
                           color={Colors.white}
-                          size={38}
+                          size={25}
                         />
                       ) : (
                         <Image
                           style={{
-                            marginTop: 12,
-                            width: 35,
-                            height: 35,
+                            marginTop: 10,
+                            width: 25,
+                            height: 25,
                             borderRadius: 360,
                           }}
                           source={{ uri: ouruserdata.profile_pic_name }}
@@ -561,14 +561,14 @@ export default function Message({ navigation, route }) {
                             }}
                             name="person-circle-outline"
                             color={Colors.white}
-                            size={38}
+                            size={25}
                           />
                         ) : (
                           <Image
                             style={{
-                              marginTop: 12,
-                              width: 35,
-                              height: 35,
+                              marginTop: 10,
+                              width: 25,
+                              height: 25,
                               borderRadius: 360,
                             }}
                             source={{ uri: fuserdata.profile_pic_name }}
@@ -601,17 +601,15 @@ export default function Message({ navigation, route }) {
               color={Colors.brown}
               size={22}
             />
-            <KeyboardAvoidingView behavior="padding">
-              <TextInput
-                keyboardType="default"
-                style={styles.input}
-                onChangeText={setCurrentmessage}
-                value={currentmessage}
-                onSubmitEditing={() => {
-                  sendMessage();
-                }}
-              />
-            </KeyboardAvoidingView>
+            <TextInput
+              keyboardType="default"
+              style={styles.input}
+              onChangeText={setCurrentmessage}
+              value={currentmessage}
+              // onSubmitEditing={() => {
+              //   sendMessage();
+              // }}
+            />
 
             {currentmessage || image ? (
               <Ionicons
@@ -678,7 +676,7 @@ const styles = StyleSheet.create({
   },
   message: {
     width: "100%",
-    // padding:10,
+    paddingLeft: 25,
     borderRadius: 10,
     // marginVertical:5,
     // backgroundColor:'red',
@@ -686,6 +684,7 @@ const styles = StyleSheet.create({
   messageView: {
     width: "100%",
     height: "60%",
+    marginBottom: 10,
   },
   messageRight: {
     width: "90%",
@@ -697,10 +696,9 @@ const styles = StyleSheet.create({
     color: "white",
     backgroundColor: Colors.pink, // width:'min-content',
     minWidth: 100,
-    padding: 10,
+    padding: 4,
     fontSize: 17,
     marginLeft: 15,
-    flex: 1,
     textAlign: "center",
     borderRadius: 20,
     margin: 10,

@@ -108,16 +108,16 @@ export default function RegisterScreen({ navigation }) {
           .then((data) => {
             // console.log(data);
             if (data.message == "Invalid email address") {
-              alert("Invalid email address");
+              Alert.alert("Invalid email address");
             } else if (data.error) {
               // alert('Invalid Credentials')
               // setLoading(false);
               setErrormsg(data.error);
             } else if (data.message == "Email or userName Already exist") {
-              alert("Email or userName Already exist");
+              Alert.alert("Email or userName Already exist");
             } else {
               // console.log(data.udata);
-              alert("User Register Successfully.Now do Login");
+              Alert.alert("User Register Successfully.Now do Login");
               // setLoading(false);
 
               navigation.navigate("Login");
@@ -146,7 +146,7 @@ export default function RegisterScreen({ navigation }) {
       <SafeAreaView style={styles.rootScreen}>
         <Image
           style={{ height: "10%", width: "60%" }}
-          source={require("../assets/Ondosecondary.png")}
+          source={require("../assets/OndoPrimary1.png")}
         />
         <View style={styles.textInputField}>
           <Text style={styles.text}>Play</Text>
@@ -160,7 +160,7 @@ export default function RegisterScreen({ navigation }) {
           style={styles.input}
           onPressIn={() => setErrormsg(null)}
           onChangeText={(texts) => setuserName(texts)}
-          placeholder="userName"
+          placeholder="Username"
           autoCorrect={false}
         />
         <TextInput

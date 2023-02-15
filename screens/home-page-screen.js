@@ -136,7 +136,7 @@ function HomePage() {
         }}
         styleBubble={{
           backgroundColor: Colors.dark,
-          height: hp("25%"),
+          height: hp("27%"),
           width: wp("50%"),
         }}
         iconName={"md-chatbubble-ellipses-outline"}
@@ -147,7 +147,7 @@ function HomePage() {
       />
       <Bubble
         style={{
-          right: rightBubbleAnim.interpolate({
+          left: leftBubbleAnim.interpolate({
             inputRange: [0, 1],
             outputRange: [-width, 0],
           }),
@@ -155,7 +155,7 @@ function HomePage() {
         onpress={() => navigation.push("Settings", { disabledAnimation: true })}
         styleBubble={{
           backgroundColor: Colors.orange,
-          height: hp("17%"),
+          height: hp("18%"),
           width: wp("34%"),
         }}
         bubbleStyle={{
@@ -171,6 +171,12 @@ function HomePage() {
         textStyle={styles.textone}
       />
       <Bubble
+        style={{
+          left: leftBubbleAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [-width, 0],
+          }),
+        }}
         onpress={() =>
           navigation.push("CreateEvent", { disabledAnimation: true })
         }
@@ -182,7 +188,7 @@ function HomePage() {
         }}
         styleBubble={{
           backgroundColor: Colors.brown,
-          height: hp("30%"),
+          height: hp("32%"),
           width: wp("60%"),
         }}
         iconName={"add-sharp"}
@@ -192,6 +198,12 @@ function HomePage() {
         textStyle={styles.texttwo}
       />
       <Bubble
+        style={{
+          left: leftBubbleAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [-width, 0],
+          }),
+        }}
         onpress={() =>
           navigation.navigate("ProfileScreen", { disabledAnimation: true })
         }
@@ -203,7 +215,7 @@ function HomePage() {
         }}
         styleBubble={{
           backgroundColor: Colors.pink,
-          height: hp("27%"),
+          height: hp("29%"),
           width: wp("54%"),
         }}
         iconName={"person-outline"}
@@ -213,6 +225,12 @@ function HomePage() {
         textStyle={styles.texttwo}
       />
       <Bubble
+        style={{
+          left: leftBubbleAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [-width, 0],
+          }),
+        }}
         onpress={() => navigation.push("Events", { disabledAnimation: true })}
         bubbleStyle={{
           top: hp("70%"),
@@ -222,7 +240,7 @@ function HomePage() {
         }}
         styleBubble={{
           backgroundColor: Colors.dark,
-          height: hp("23%"),
+          height: hp("25%"),
           width: wp("46%"),
         }}
         iconName={"calendar-outline"}
@@ -232,6 +250,12 @@ function HomePage() {
         textStyle={styles.text}
       />
       <Bubble
+        style={{
+          left: leftBubbleAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [-width, 0],
+          }),
+        }}
         onpress={() => navigation.push("search", { disabledAnimation: true })}
         bubbleStyle={{
           top: hp("75%"),
@@ -241,7 +265,7 @@ function HomePage() {
         }}
         styleBubble={{
           backgroundColor: Colors.orange,
-          height: hp("17%"),
+          height: hp("18%"),
           width: wp("34%"),
         }}
         iconName={"search-outline"}

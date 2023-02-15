@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
+import { Alert } from "react-native";
 import {
   Dimensions,
   FlatList,
@@ -38,14 +39,21 @@ function ChangedBio({ navigation, modalVisible, setModalVisible }) {
           }),
         })
           .then((res) => res.json())
-          .then((data) => {
-            if (data.message == "Bio Updated Successfully") {
+          .then(async (dat) => {
+            if (dat.message == "Bio Updated Successfully") {
               //  setLoading(false);
-              alert("Bio Changed Successfully");
-              AsyncStorage.removeItem("user");
-              navigation.push("Login");
+              Alert.alert("Bio Changed Successfully");
+              const parsedUserData = JSON.parse(data);
+              console.log(parsedUserData.user.bio);
+              parsedUserData.user.bio = bio;
+              await AsyncStorage.setItem(
+                "user",
+                JSON.stringify(parsedUserData)
+              );
+              setnewbio("");
+              navigation.navigate("HomePage");
             } else {
-              alert("Something went Wrong");
+              Alert.alert("Something went Wrong");
               //  setLoading(false);
             }
           });
@@ -69,9 +77,7 @@ function ChangedBio({ navigation, modalVisible, setModalVisible }) {
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
-          <Text style={styles.fontDesign}>
-            {selectLan == 0 ? language[19].eng : language[19].arab}
-          </Text>
+          <Text style={styles.fontDesign}>Change Bio </Text>
           <View style={{ width: "100%" }}>
             <TextInput
               style={styles.input}

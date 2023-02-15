@@ -52,7 +52,7 @@ export default function OtherUser({ navigation, route }) {
       const loggeduserobj = JSON.parse(loggeduser);
       if (loggeduserobj.user._id == otheruser._id) {
         setIssameuser(true);
-        alert("Same User Found");
+        Alert.alert("Same User Found");
         navigation.push("search", { disabledAnimation: true });
       } else {
         setIssameuser(false);
@@ -77,14 +77,14 @@ export default function OtherUser({ navigation, route }) {
           ismyprofile(data.user);
           CheckFollow(data.user);
         } else {
-          alert("User Not Found");
+          Alert.alert("User Not Found");
           navigation.navigate("search");
           // navigation.navigate('Login')
         }
       })
       .catch((err) => {
         // console.log(err)
-        alert("Something Went Wrong");
+        Alert.alert("Something Went Wrong");
         navigation.navigate("search");
       });
   };
@@ -109,7 +109,7 @@ export default function OtherUser({ navigation, route }) {
       .then((data) => {
         if (data.message == "User Followed") {
           console.log(data);
-          alert("Followed");
+          Alert.alert("Followed");
           fetch(apis + "send-notification", {
             method: "POST",
             headers: {
@@ -124,7 +124,7 @@ export default function OtherUser({ navigation, route }) {
           loaddata();
           setIsfollowing(true);
         } else {
-          alert("Something Went Wrong");
+          Alert.alert("Something Went Wrong");
           console.log(data);
         }
       });
@@ -152,7 +152,7 @@ export default function OtherUser({ navigation, route }) {
             setIsfollowing(false);
           } else {
             // loaddata()
-            alert("Something Went Wrong");
+            Alert.alert("Something Went Wrong");
           }
         });
     });
@@ -175,7 +175,7 @@ export default function OtherUser({ navigation, route }) {
       .then((res) => res.json())
       .then((data) => {
         if (data.message == "User Unfollowed") {
-          alert("User Unfollowed");
+          Alert.alert("User Unfollowed");
           fetch(apis + "send-notification", {
             method: "POST",
             headers: {
@@ -190,7 +190,7 @@ export default function OtherUser({ navigation, route }) {
           loaddata();
           setIsfollowing(false);
         } else {
-          alert("Something Went Wrong");
+          Alert.alert("Something Went Wrong");
         }
       });
   };
@@ -290,13 +290,22 @@ export default function OtherUser({ navigation, route }) {
         ]}
       >
         <View style={styles.userDetail}>
-          <Text style={[styles.fonts, { color: Colors.brown }]}>
+          <Text
+            numberOfLines={1}
+            style={[styles.fonts, { color: Colors.brown }]}
+          >
             @{userdata.userName}
           </Text>
-          <Text style={[styles.fonts, { color: Colors.white }]}>
+          <Text
+            numberOfLines={2}
+            style={[styles.fonts, { color: Colors.white }]}
+          >
             {userdata.bio === "" ? "bio" : userdata.bio}
           </Text>
-          <Text style={[styles.fonts, { color: Colors.brown }]}>
+          <Text
+            numberOfLines={3}
+            style={[styles.fonts, { color: Colors.brown }]}
+          >
             {userdata.links === "" ? "links" : userdata.links}
           </Text>
         </View>

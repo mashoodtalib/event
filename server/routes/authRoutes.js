@@ -131,7 +131,7 @@ router.post("/signup", async (req, res) => {
       res.send({
         message: "User Registered Successfully",
         token,
-        user: { userName, name, email, password },
+        user: { userName, name, email, password, deviceToken },
       });
     } catch (err) {
       console.log(err);
@@ -373,17 +373,34 @@ router.post("/setbio", (req, res) => {
     if (savedUser.length > 0) {
       return res.status(422).json({ error: "Bio already exists" });
     } else {
-      User.findOne({ email: email }).then(async (savedUser) => {
-        if (savedUser) {
-          savedUser.bio = bio;
-          savedUser
-            .save()
-            .then((user) => {
-              res.json({ message: "Bio Updated Successfully" });
-            })
-            .catch((err) => {
-              return res.status(422).json({ error: "Server Error" });
-            });
+      User.findOne({ email: email }).then(async (saveduser) => {
+        const token = jwt.sign({ _id: saveduser._id }, process.env.JWT_SECRET);
+        if (saveduser) {
+          saveduser.bio = bio;
+          let data = {
+            _id: saveduser._id,
+            userName: saveduser.userName,
+            name: saveduser.name,
+            deviceToken: saveduser.deviceToken,
+            email: email,
+            profile_pic_name: saveduser.profile_pic_name,
+            bio: bio,
+            links: saveduser.links,
+            followers: saveduser.followers,
+            following: saveduser.following,
+            allmessages: saveduser.allmessages,
+            allevents: saveduser.allevents,
+            accevents: saveduser.accevents,
+            passwordResetToken: saveduser.passwordResetToken,
+            passwordResetExpires: saveduser.passwordResetExpires,
+            acceventsfrom: saveduser.acceventsfrom,
+          };
+          saveduser.save();
+          res.status(200).send({
+            message: "Bio Updated Successfully",
+            token,
+            user: data,
+          });
         } else {
           return res.status(422).json({ error: "Invalid Credentials" });
         }
@@ -401,17 +418,34 @@ router.post("/setlink", (req, res) => {
     if (savedUser.length > 0) {
       return res.status(422).json({ error: "links already exists" });
     } else {
-      User.findOne({ email: email }).then(async (savedUser) => {
-        if (savedUser) {
-          savedUser.links = links;
-          savedUser
-            .save()
-            .then((user) => {
-              res.json({ message: "links Updated Successfully" });
-            })
-            .catch((err) => {
-              return res.status(422).json({ error: "Server Error" });
-            });
+      User.findOne({ email: email }).then(async (saveduser) => {
+        const token = jwt.sign({ _id: saveduser._id }, process.env.JWT_SECRET);
+        if (saveduser) {
+          saveduser.links = links;
+          let data = {
+            _id: saveduser._id,
+            userName: saveduser.userName,
+            name: saveduser.name,
+            deviceToken: saveduser.deviceToken,
+            email: email,
+            profile_pic_name: saveduser.profile_pic_name,
+            bio: saveduser.bio,
+            links: links,
+            followers: saveduser.followers,
+            following: saveduser.following,
+            allmessages: saveduser.allmessages,
+            allevents: saveduser.allevents,
+            accevents: saveduser.accevents,
+            passwordResetToken: saveduser.passwordResetToken,
+            passwordResetExpires: saveduser.passwordResetExpires,
+            acceventsfrom: saveduser.acceventsfrom,
+          };
+          saveduser.save();
+          res.status(200).send({
+            message: "links Updated Successfully",
+            token,
+            user: data,
+          });
         } else {
           return res.status(422).json({ error: "Invalid Credentials" });
         }
@@ -433,7 +467,7 @@ router.post("/searchuser", (req, res) => {
       user.map((item) => {
         data.push({
           _id: item._id,
-          username: item.userName,
+          userName: item.userName,
           email: item.email,
           profile_pic_name: item.profile_pic_name,
         });
@@ -697,5 +731,10 @@ router.post("/send-notification", (req, res) => {
       res.status(500).send({ error: "Failed to send push notification" });
     });
 });
-
+router.post("/alluser", (req, res) => {
+  User.find({}, (err, events) => {
+    if (err) return res.status(500).send(err);
+    return res.status(200).send(events);
+  });
+});
 module.exports = router;

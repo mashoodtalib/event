@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
+import { Alert } from "react-native";
 import {
   Dimensions,
   FlatList,
@@ -41,11 +42,11 @@ function ChangeUserName({ navigation, modalVisible, setModalVisible }) {
           .then((data) => {
             if (data.message == "Username Updated Successfully") {
               //  setLoading(false);
-              alert("Username Changed Successfully");
+              Alert.alert("Username Changed Successfully");
               AsyncStorage.removeItem("user");
               navigation.push("Login");
             } else {
-              alert("Something went Wrong");
+              Alert.alert("Something went Wrong");
               //  setLoading(false);
             }
           });

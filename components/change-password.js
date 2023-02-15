@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
+import { Alert } from "react-native";
 import {
   Dimensions,
   FlatList,
@@ -45,11 +46,11 @@ function ChangePassword({ navigation, modalVisible, setModalVisible }) {
           .then((res) => res.json())
           .then((data) => {
             if (data.message == "Password Changed Successfully") {
-              alert("Password Changed Successfully");
+              Alert.alert("Password Changed Successfully");
               AsyncStorage.removeItem("user");
               navigation.push("Login");
             } else {
-              alert("Wrong Password");
+              Alert.alert("Wrong Password");
             }
           });
       });

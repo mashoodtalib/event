@@ -44,14 +44,14 @@ export default function LoginScreen({ navigation }) {
         .then((res) => res.json())
         .then(async (data) => {
           if (data.error) {
-            alert(data.error);
+            Alert.alert(data.error);
           } else if (data.message == "Successfully Signed In") {
             await AsyncStorage.setItem("user", JSON.stringify(data));
             navigation.navigate("HomePage", { data });
           }
         })
         .catch((err) => {
-          alert(err);
+          Alert.alert(err);
         });
     }
     // navigation.navigate('MainPage')
@@ -68,7 +68,7 @@ export default function LoginScreen({ navigation }) {
       <View style={styles.rootScreen}>
         <Image
           style={{ height: "10%", width: "60%" }}
-          source={require("../assets/Ondosecondary.png")}
+          source={require("../assets/OndoPrimary1.png")}
         />
         <View style={styles.textInputField}>
           <Text style={styles.text}>Play</Text>
@@ -82,7 +82,7 @@ export default function LoginScreen({ navigation }) {
           style={styles.input}
           onPressIn={() => setErrormsg(null)}
           onChangeText={(text) => setuserName(text)}
-          placeholder="userName"
+          placeholder="Username"
           autoCorrect={false}
         />
 

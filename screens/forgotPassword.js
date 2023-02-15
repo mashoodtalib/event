@@ -29,6 +29,7 @@ const ForgotPassword = ({ navigation }) => {
       });
       if (response.ok) {
         const data = response.json();
+
         navigation.navigate("ResetPass", { email: email });
       }
       // handle the response from the server
@@ -41,7 +42,7 @@ const ForgotPassword = ({ navigation }) => {
       <View style={styles.rootScreen}>
         <Image
           style={{ height: "10%", width: "60%" }}
-          source={require("../assets/Ondosecondary.png")}
+          source={require("../assets/OndoPrimary1.png")}
         />
         <View style={styles.textInputField}>
           <Text style={styles.text}>Play</Text>

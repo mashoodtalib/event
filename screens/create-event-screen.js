@@ -241,7 +241,7 @@ function CreateEventScreen({ navigation }) {
                   }
                 });
 
-              alert("Event Added Successfully");
+              Alert.alert("Event Added Successfully");
               navigation.navigate(
                 "SendEvents",
                 { data: JSON.parse(data).user.userName },
@@ -263,135 +263,144 @@ function CreateEventScreen({ navigation }) {
       crossColor={Colors.pink}
       navigation={navigation}
     >
-      <ScrollView
-        style={{ marginBottom: size / 10, marginTop: size / 13, height: 100 }}
-      >
-        <View style={styles.root}>
-          <Text style={styles.fontDesign}>
-            {selectLan == 0 ? language[2].eng : language[2].arab}
-          </Text>
-          <View style={styles.anRoot}>
-            <Text style={styles.fontDesign}>
-              {selectLan == 0 ? language[20].eng : null}
+      <View style={{ flex: 1, flexDirection: "column", marginHorizontal: 18 }}>
+        <ScrollView
+          showsVerticalScrollIndicator={true}
+          style={{
+            marginBottom: size / 10,
+            marginTop: size / 8,
+            height: "100%",
+          }}
+        >
+          <View style={styles.root}>
+            <Text style={[styles.fontDesign, { fontSize: 24 }]}>
+              {selectLan == 0 ? language[2].eng : language[2].arab}
             </Text>
-            <TextInput
-              textAlign="center"
-              cursorColor={Colors.brown}
-              style={styles.input}
-              onChangeText={onChangeText}
-              value={text}
-            />
-            <Text style={styles.fontDesign}>
-              {selectLan == 0 ? null : language[20].arab}
-            </Text>
-          </View>
-          <View style={styles.anRoot}>
-            <Text style={styles.fontDesign}>
-              {selectLan == 0 ? language[21].eng : null}
-            </Text>
-            <TextInput
-              textAlign="center"
-              cursorColor={Colors.brown}
-              style={[styles.input]}
-              onChangeText={onChangeDesc}
-              value={desc}
-            />
-            <Text style={styles.fontDesign}>
-              {selectLan == 0 ? null : language[21].arab}
-            </Text>
-          </View>
-          <View style={styles.anRoot}>
-            <Text style={styles.fontDesign}>
-              {selectLan == 0 ? language[22].eng : null}
-            </Text>
-            <Pressable
-              // style={styles.input}
-              onPress={showDatepicker}
-              title="Pick Date"
-            >
-              <View style={{ flexDirection: "row" }}>
-                <View style={[styles.dateIn, { height: 25, width: 30 }]}>
-                  <Text style={styles.fontDesign1}>
-                    {date.getDate().toLocaleString()}
-                  </Text>
-                </View>
-                <View style={[styles.dateIn, { height: 25, width: 40 }]}>
-                  <Text style={styles.fontDesign1}>
-                    {date.getFullYear().toLocaleString()}
-                  </Text>
-                </View>
-                <View style={[styles.dateIn, { height: 25, width: 50 }]}>
-                  <Text style={styles.fontDesign1}>
-                    {month[date.getMonth().toLocaleString()]}
-                  </Text>
-                </View>
-              </View>
-            </Pressable>
-            <Text style={styles.fontDesign}>
-              {selectLan == 0 ? null : language[22].arab}
-            </Text>
-          </View>
-
-          <View
-            style={{
-              marginTop: size / 13,
-              marginRight: size / 7,
-              flexDirection: "row",
-            }}
-          >
-            <Text style={[styles.fontDesign, { marginRight: 5 }]}>
-              Privacy{" "}
-            </Text>
-            <View style={{ flexDirection: "column" }}>
-              {/* To create radio buttons, loop through your array of options */}
-              {radio_props.map((obj, i) => (
-                <RadioButton labelHorizontal={false} key={i}>
-                  {/*  You can set RadioButtonLabel before RadioButtonInput */}
-                  <View style={styles.lanItem}>
-                    <RadioButtonInput
-                      obj={obj}
-                      index={i}
-                      isSelected={isActive === i}
-                      onPress={(value) => setIsActive(value)}
-                      borderWidth={0}
-                      buttonInnerColor={Colors.pink}
-                      buttonOuterColor={Colors.white}
-                      buttonSize={12}
-                      buttonOuterSize={18}
-                      // buttonStyle={{}}
-                      // buttonWrapStyle={{ marginLeft: 10 }}
-                    />
-                    <RadioButtonLabel
-                      obj={obj}
-                      index={i}
-                      onPress={(value) => setIsActive(value)}
-                      labelStyle={[
-                        styles.fontDesign1,
-                        { color: Colors.pink, fontSize: 14, marginLeft: 4 },
-                      ]}
-                    />
-                  </View>
-                </RadioButton>
-              ))}
+            <View style={styles.anRoot}>
+              <Text style={styles.fontDesign}>
+                {selectLan == 0 ? language[20].eng : null}
+              </Text>
+              <TextInput
+                textAlign="center"
+                cursorColor={Colors.brown}
+                style={styles.input}
+                onChangeText={onChangeText}
+                value={text}
+              />
+              <Text style={styles.fontDesign}>
+                {selectLan == 0 ? null : language[20].arab}
+              </Text>
             </View>
-          </View>
-          {!load ? (
-            <Pressable
-              style={[styles.dateIn, { height: 25, width: 50, marginTop: 8 }]}
-              onPress={() => {
-                eventSet();
+            <View style={styles.anRoot}>
+              <Text style={styles.fontDesign}>
+                {selectLan == 0 ? language[21].eng : null}
+              </Text>
+              <TextInput
+                textAlign="center"
+                cursorColor={Colors.brown}
+                style={[styles.input]}
+                onChangeText={onChangeDesc}
+                value={desc}
+              />
+              <Text style={styles.fontDesign}>
+                {selectLan == 0 ? null : language[21].arab}
+              </Text>
+            </View>
+            <View style={styles.anRoot}>
+              <Text style={styles.fontDesign}>
+                {selectLan == 0 ? language[22].eng : null}
+              </Text>
+              <Pressable
+                // style={styles.input}
+                onPress={showDatepicker}
+                title="Pick Date"
+              >
+                <View style={{ flexDirection: "row" }}>
+                  <View style={[styles.dateIn, { height: 18, width: 30 }]}>
+                    <Text style={styles.fontDesign1}>
+                      {date.getDate().toLocaleString()}
+                    </Text>
+                  </View>
+                  <View style={[styles.dateIn, { height: 18, width: 50 }]}>
+                    <Text style={styles.fontDesign1}>
+                      {month[date.getMonth().toLocaleString()]}
+                    </Text>
+                  </View>
+                  <View style={[styles.dateIn, { height: 18, width: 40 }]}>
+                    <Text style={styles.fontDesign1}>
+                      {date.getFullYear().toLocaleString()}
+                    </Text>
+                  </View>
+                </View>
+              </Pressable>
+              <Text style={styles.fontDesign}>
+                {selectLan == 0 ? null : language[22].arab}
+              </Text>
+            </View>
+
+            <View
+              style={{
+                marginTop: size / 13,
+                marginRight: size / 7,
+                flexDirection: "row",
               }}
             >
-              <Text style={styles.fontDesign1}>
-                {" "}
-                {selectLan == 0 ? language[23].eng : language[23].arab}
+              <Text style={[styles.fontDesign, { marginRight: 5 }]}>
+                Privacy
               </Text>
-            </Pressable>
-          ) : (
-            <ActivityIndicator />
-          )}
-        </View>
-      </ScrollView>
+              <View style={{ flexDirection: "column" }}>
+                {/* To create radio buttons, loop through your array of options */}
+                {radio_props.map((obj, i) => (
+                  <RadioButton labelHorizontal={false} key={i}>
+                    {/*  You can set RadioButtonLabel before RadioButtonInput */}
+                    <View style={styles.lanItem}>
+                      <RadioButtonInput
+                        obj={obj}
+                        index={i}
+                        isSelected={isActive === i}
+                        onPress={(value) => setIsActive(value)}
+                        borderWidth={0}
+                        buttonInnerColor={Colors.pink}
+                        buttonOuterColor={Colors.white}
+                        buttonSize={12}
+                        buttonOuterSize={18}
+                        // buttonStyle={{}}
+                        // buttonWrapStyle={{ marginLeft: 10 }}
+                      />
+                      <RadioButtonLabel
+                        obj={obj}
+                        index={i}
+                        onPress={(value) => setIsActive(value)}
+                        labelStyle={[
+                          styles.fontDesign1,
+                          {
+                            color: Colors.pink,
+                            fontSize: 14,
+                            marginLeft: 4,
+                            marginBottom: 10,
+                          },
+                        ]}
+                      />
+                    </View>
+                  </RadioButton>
+                ))}
+              </View>
+            </View>
+            {!load ? (
+              <Pressable
+                style={[styles.dateIn, { height: 20, width: 40, marginTop: 8 }]}
+                onPress={() => {
+                  eventSet();
+                }}
+              >
+                <Text style={styles.fontDesign1}>Set</Text>
+              </Pressable>
+            ) : (
+              <ActivityIndicator />
+            )}
+          </View>
+        </ScrollView>
+      </View>
     </CustomBubble>
   );
 }
@@ -400,7 +409,6 @@ export default CreateEventScreen;
 const styles = StyleSheet.create({
   root: {
     marginBottom: size / 10,
-    flex: 1,
     alignItems: "center",
     flexDirection: "column",
   },
@@ -410,11 +418,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   fontDesign: {
+    textAlign: "center",
     fontFamily: "GothicA1-Regular",
     color: Colors.white,
-    fontSize: 24,
+    fontSize: 18,
+    marginRight: 5,
   },
   fontDesign1: {
+    textAlign: "center",
+    fontSize: 12,
+
     fontFamily: "GothicA1-Regular",
     color: Colors.white,
   },
@@ -445,7 +458,7 @@ const styles = StyleSheet.create({
     color: Colors.pink,
     flexDirection: "row",
     marginTop: 5,
-    alignItems: "center",
+    alignItems: "flex-start",
   },
   icon: {
     backgroundColor: Colors.white,
@@ -454,8 +467,10 @@ const styles = StyleSheet.create({
     height: 16,
   },
   input: {
-    height: 25,
-    width: size / 2.5,
+    height: 18,
+    textAlign: "center",
+    fontSize: 12,
+    width: size / 3,
     fontFamily: "GothicA1-Medium",
     backgroundColor: Colors.pink,
     borderRadius: 24,

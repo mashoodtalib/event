@@ -224,10 +224,14 @@ export default function ProfileBubble({ navigation }) {
         ]}
       >
         <View style={styles.userDetail}>
-          <Text style={[styles.fonts, { color: Colors.brown }]}>
+          <Text
+            numberOfLines={1}
+            style={[styles.fonts, { color: Colors.brown }]}
+          >
             @{userdata.userName}
           </Text>
           <Text
+            numberOfLines={2}
             onPress={() => {
               setModalVisible(!modalVisible);
             }}
@@ -236,6 +240,7 @@ export default function ProfileBubble({ navigation }) {
             {userdata.bio === "" ? "bio" : userdata.bio}
           </Text>
           <Text
+            numberOfLines={3}
             onPress={() => {
               setModalVisible1(!modalVisible);
             }}
@@ -301,6 +306,7 @@ export default function ProfileBubble({ navigation }) {
           ]}
         >
           <Ionicons
+            onPress={() => navigation.navigate("allFriends")}
             name={"person-add-outline"}
             color={Colors.white}
             size={24}
@@ -319,6 +325,7 @@ export default function ProfileBubble({ navigation }) {
           ]}
         >
           <Ionicons
+            onPress={() => navigation.navigate("allFriends")}
             name={"md-chatbubbles-sharp"}
             color={Colors.white}
             size={24}
@@ -336,7 +343,12 @@ export default function ProfileBubble({ navigation }) {
             { opacity: progress, transform: [{ scale }] },
           ]}
         >
-          <Ionicons name={"calendar-outline"} color={Colors.white} size={24} />
+          <Ionicons
+            onPress={() => navigation.navigate("Events")}
+            name={"calendar-outline"}
+            color={Colors.white}
+            size={24}
+          />
         </Animated.View>
       </Animated.View>
       <ChangedBio

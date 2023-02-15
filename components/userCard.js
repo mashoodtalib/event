@@ -22,7 +22,7 @@ const UserCard = ({ user, navigation }) => {
         )}
 
         <View style={styles.c1}>
-          <Text style={styles.username}>{user.username}</Text>
+          <Text style={styles.username}>{user.userName}</Text>
         </View>
       </View>
     </TouchableOpacity>

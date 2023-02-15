@@ -20,6 +20,7 @@ const SearchUserPage = ({ navigation }) => {
   const [keyword, setKeyword] = useState("");
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
+  const [datas, setDatas] = useState([]);
   const [error, setError] = useState(null);
 
   const getallusers = async () => {
@@ -34,7 +35,7 @@ const SearchUserPage = ({ navigation }) => {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log(data);
+          //  console.log(data);
           if (data.error) {
             setData([]);
             setError(data.error);
@@ -58,43 +59,85 @@ const SearchUserPage = ({ navigation }) => {
   useEffect(() => {
     getallusers();
   }, [keyword]);
+
+  useEffect(() => {
+    getall();
+  }, []);
+  const getall = async () => {
+    setLoading(true);
+    await fetch(apis + "alluser", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        if (data.error) {
+          setDatas([]);
+          setError(data.error);
+          setLoading(false);
+        } else {
+          setError(null);
+          setDatas(data);
+          // console.log("asdddddddddddddddddddddddd", data.user);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        setDatas([]);
+        setLoading(false);
+      });
+  };
   return (
     <CustomBubble
       bubbleColor={Colors.orange}
       crossColor={Colors.pink}
       navigation={navigation}
     >
-      <View style={styles.container}>
-        <TextInput
-          style={styles.input}
-          placeholder="Search By Username.."
-          onChangeText={(text) => {
-            setKeyword(text);
-          }}
-        />
-
-        {loading ? (
-          <ActivityIndicator size="large" color="white" />
-        ) : (
-          <>
-            {error ? (
-              <Text>{error}</Text>
-            ) : (
-              <ScrollView style={styles.userlists}>
-                {data.map((item, index) => {
-                  return (
-                    <UserCard
-                      key={item.username}
-                      user={item}
-                      navigation={navigation}
-                    />
-                  );
-                })}
-              </ScrollView>
-            )}
-          </>
-        )}
-      </View>
+      {!datas ? (
+        <ActivityIndicator size="large" color="white" />
+      ) : (
+        <View style={styles.container}>
+          <TextInput
+            style={styles.input}
+            placeholder="Search By Username.."
+            onChangeText={(text) => {
+              setKeyword(text);
+            }}
+          />
+          {!keyword ? (
+            <ScrollView style={styles.userlists}>
+              {datas.map((item, index) => {
+                return (
+                  <UserCard key={index} user={item} navigation={navigation} />
+                );
+              })}
+            </ScrollView>
+          ) : loading ? (
+            <ActivityIndicator size="large" color="white" />
+          ) : (
+            <>
+              {error ? (
+                <Text>{error}</Text>
+              ) : (
+                <ScrollView style={styles.userlists}>
+                  {data.map((item, index) => {
+                    return (
+                      <UserCard
+                        key={item.username}
+                        user={item}
+                        navigation={navigation}
+                      />
+                    );
+                  })}
+                </ScrollView>
+              )}
+            </>
+          )}
+        </View>
+      )}
     </CustomBubble>
   );
 };

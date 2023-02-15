@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Alert } from "react-native";
 import {
   Dimensions,
   FlatList,
@@ -113,7 +114,9 @@ function LanModal({ modalVisible, setModalVisible, onSelectLan }) {
               onPress={() => {
                 setModalVisible(false);
                 onSelectLan(selectLan);
-                alert(selectLan == 0 ? language[12].eng : language[12].arab);
+                Alert.alert(
+                  selectLan == 0 ? language[12].eng : language[12].arab
+                );
               }}
               style={{
                 width: "40%",
