@@ -126,7 +126,7 @@ const SearchUserPage = ({ navigation }) => {
                   {data.map((item, index) => {
                     return (
                       <UserCard
-                        key={item.username}
+                        key={item}
                         user={item}
                         navigation={navigation}
                       />
